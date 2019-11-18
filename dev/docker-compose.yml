@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:latest
+    # mysql / node-mysql2 js libs do not support the newer password hashing scheme :(
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - 3100:3306
+    restart: always
+    environment:
+      MYSQL_USER: spaceship
+      MYSQL_PASSWORD: spaceship
+      MYSQL_DATABASE: spaceship
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+  redis:
+    image: redis:4.0
+    ports:
+      - 3101:6379
+    volumes:
+      - db_data:/data
+volumes:
+  db_data: {}
