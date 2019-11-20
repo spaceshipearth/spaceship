@@ -2,8 +2,9 @@ import React from 'react';
 import EarthJpg from '../../public/earth.jpg';
 import './Home.css';
 import gql from 'graphql-tag';
-import { Container,  Grid, Card, CardActionArea, CardContent, CardHeader, CardMedia, CardActions, Typography, Button, Box } from '@material-ui/core';
+import { Container,  Grid, Card, CardActionArea, CardContent, CardMedia, CardActions, Typography, Button, Box } from '@material-ui/core';
 import { useQuery, useMutation } from 'react-apollo';
+import {CategoryEditor, GoalEditor} from './ObjectEditor';
 
 export const goalsQuery = gql`
   query Missions {
@@ -19,6 +20,7 @@ export const goalsQuery = gql`
         shortDescription
         longDescription
         displayRank
+        categoryId
       }
     }
   }
@@ -41,18 +43,21 @@ function Dashboard() {
 
   return (
     <Container maxWidth="md" style={{ marginTop: 50 }}>
-      {data.categories.filter(c=>c.goals.length).map(category => (
-        <Box style={{marginBottom:64}}>
-          <Typography variant="h2" key={category.id}>
-            {category.title}
-          </Typography>
-          <Grid container>
-            {category.goals.map(goal => (
-              <GoalCard goal={goal} />
-            ))}
-          </Grid>
-        </Box>
-      ))}
+      {data.categories
+        .filter(c => c.goals.length)
+        .map(category => (
+          <Box style={{ marginBottom: 64 }} key={category.id}>
+            <Typography variant="h2">
+              {category.title}
+              <CategoryEditor category={category} />
+            </Typography>
+            <Grid container>
+              {category.goals.map(goal => (
+                <GoalCard key={goal.id} goal={goal} />
+              ))}
+            </Grid>
+          </Box>
+        ))}
     </Container>
   );
 }
@@ -84,7 +89,6 @@ function GoalCard({goal}) {
   function handlePlanMissionClick() {
     planMission({variables:{goalId: goal.id}});
   }
-  console.log(data);
 
   return (
     <Grid item component={Card} key={goal.id} style={cardStyle}>
@@ -110,9 +114,13 @@ function GoalCard({goal}) {
         <Button size="small" color="primary" onClick={handlePlanMissionClick}>
           Plan Mission
         </Button>
+        <GoalEditor goal={goal} />
       </CardActions>
     </Grid>
   );
 }
+
+
+
 
 export default Dashboard;

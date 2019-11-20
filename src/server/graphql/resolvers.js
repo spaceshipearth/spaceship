@@ -46,7 +46,7 @@ export default {
     categories: async (parent, {}, {}) => {
       return models.Category.findAll();
     },
-    mission: async (parent, {id}, {}) => {
+    mission: async (parent, { id }, {}) => {
       return models.Mission.findByPk(id);
     }
   },
@@ -65,7 +65,7 @@ export default {
     team: async (parent, {}, {}) => {
       //const userMissions = await models.UserMission.findAll({ where: { missionId: parent.id }});
       return;
-    },
+    }
   },
   Mutation: {
     signIn: async (parent, { email: userEmail }, { req }) => {
@@ -92,6 +92,14 @@ export default {
         text: `Click here to sign-in to 2020 Madness: ${signInUrl}`
       });
       return;
+    },
+    upsertCategory: async (parent, args, { req, res, currentUser }) => {
+      await models.Category.upsert(args);
+      return models.Category.findByPk(args.id);
+    },
+    upsertGoal: async (parent, args, { req, res, currentUser }) => {
+      await models.Goal.upsert(args);
+      return models.Goal.findByPk(args.id);
     },
     signOut: async (parent, {}, { req, res, currentUser }) => {
       delete res.locals.currentUser;

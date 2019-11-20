@@ -18,14 +18,17 @@ const schema = gql`
     displayRank: Int
     goals: [Goal]
   }
+
   type Goal {
     id: ID!
     title: String
     shortDescription: String
     longDescription: String
     displayRank: Int
+    categoryId: ID
     category: Category
   }
+
   type Mission {
     id: ID!
     goal: Goal
@@ -42,6 +45,21 @@ const schema = gql`
     signIn(email: String!): Int
     signOut: ID
     planMission(goalId: ID!): Mission
+    upsertCategory(
+      id: ID
+      title: String
+      displayRank: Int
+      shortDescription: String
+      longDescription: String
+    ): Category
+    upsertGoal(
+      id: ID
+      title: String
+      shortDescription: String
+      longDescription: String
+      displayRank: Int
+      categoryId: ID
+    ): Goal
   }
 `;
 
