@@ -76,23 +76,6 @@ async function currentUserMiddleware(req, res, next) {
       res.locals.currentUser = await User.findByPk(
         String(req.session.currentUserId)
       );
-      if (!res.locals.currentUser) {
-        console.log(
-          `Attempting session upgrade for ${req.session.currentUserId}`
-        );
-        // upgrade old sessions with numeric userIds
-        const intUserId = parseInt(userId);
-        if (intUserId == userId && intUserId > 0 && intUserId < 200) {
-          console.log(
-            `Attempting session upgrade with idx ${req.session.currentUserId}`
-          );
-          res.locals.currentUser = await User.findOne({
-            where: { idx: req.session.currentUserId }
-          });
-          console.log(res.locals.currentUser);
-          req.session.currentUserId = res.locals.currentUser.id;
-        }
-      }
       // this should only be false in dev if we emptied the DB or something
       if (res.locals.currentUser) {
         Sentry.configureScope(scope => {

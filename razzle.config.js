@@ -6,7 +6,6 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 module.exports = {
   modify(config, { target, dev }, webpack) {
-    console.log(config);
     const appConfig = config; // stay immutable here
     if (!dev) {
       appConfig['output']['publicPath'] = 'https://d1h6ehl1pyzsu8.cloudfront.net/';
