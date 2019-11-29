@@ -8,7 +8,8 @@ module.exports = {
   modify(config, { target, dev }, webpack) {
     const appConfig = config; // stay immutable here
     if (!dev) {
-      appConfig['output']['publicPath'] = 'https://d1h6ehl1pyzsu8.cloudfront.net/';
+      appConfig["output"]["publicPath"] =
+        "https://d24gftfomm9wsp.cloudfront.net/";
     }
     if (target == 'web') {
       if (appConfig['entry']['client'].pop) {
