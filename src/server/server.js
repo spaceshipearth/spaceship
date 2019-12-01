@@ -146,7 +146,7 @@ async function requestHandler(req, res, next) {
 
 function htmlBody({ assets, markup, css, initialState, currentUser, req }) {
 
-  const ogUrl = "https://spaceshipearth.org";
+  const ogUrl = "https://myspaceshipearth.com";
   const ogSiteName = "Spaceship Earth";
   const ogDesc = "";
   const ogImage = `${process.env.CDN_ROOT}/static/img/logo.jpg`;
