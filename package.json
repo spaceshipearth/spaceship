@@ -11,7 +11,8 @@
     "model:generate": "npx sequelize-cli model:generate",
     "migration:generate": "npx sequelize-cli migration:generate",
     "seed:generate": "npx sequelize-cli seed:generate",
-    "start:prod": "NODE_ENV=production node build/server.js"
+    "start:prod": "NODE_ENV=production node build/server.js",
+    "migrate:prod": "eb ssh -c '/var/app/current/bin/migrate.sh'"
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.11",
