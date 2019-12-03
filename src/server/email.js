@@ -21,7 +21,7 @@ export async function send({ to, subject, text, html }) {
         Data: subject
       }
     },
-    Source: "2020 Madness <team@myspaceshipearth.com>" /* required */,
+    Source: "Spaceship Earth Crew <team@myspaceshipearth.com>" /* required */,
     ReplyToAddresses: ["team@myspaceshipearth.com"]
   };
 

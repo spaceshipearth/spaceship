@@ -59,17 +59,17 @@ export function SigninSignupDialog({ onClose, isSignIn }) {
     <>
       <Dialog
         open={showDialog}
-//        PaperProps={{ className: styles.dialogPaper }}
+        //        PaperProps={{ className: styles.dialogPaper }}
         maxWidth="md"
         aria-labelledby="signin-dialog-title"
         onClose={onClose}
       >
         <CloseButton onClick={onClose} />
         <DialogTitle id="signin-dialog-title" disableTypography>
-          <h1>{isSignIn ? 'Sign in' : 'Sign up'}</h1>
+          <h1>{isSignIn ? "Sign in" : "Sign up"}</h1>
         </DialogTitle>
 
-        <DialogContent style={{ paddingBottom: '16px' }}>
+        <DialogContent style={{ paddingBottom: "16px" }}>
           <Box display="flex" flexDirection="column">
             <SocialLogIn
               network="twitter"
@@ -85,73 +85,55 @@ export function SigninSignupDialog({ onClose, isSignIn }) {
               textColor="#FFFFFF"
               icon={FacebookIcon}
             />
+            <SocialLogIn
+              network="google"
+              label="Sign in with Google"
+              backgroundColor="#FFFFFF"
+              textColor="#888888"
+              icon={GoogleIcon}
+            />
+            <TextField
+              style={{ marginBottom: 32 }}
+              variant="outlined"
+              id="email"
+              label="Email"
+              fullWidth
+              onChange={e => setEmail(e.target.value)}
+              onKeyPress={ev => {
+                if (ev.key === "Enter") {
+                  return handleEmailSignup();
+                  ev.preventDefault();
+                }
+              }}
+              InputProps={{
+                type: "email",
+                endAdornment: (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    color="default"
+                    onClick={handleEmailSignup}
+                    style={{ height: "52px", borderRadius: "3px" }}
+                  >
+                    Go
+                  </Button>
+                )
+              }}
+            />
 
-            {!showMore ? (
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={() => {
-                  setShowMore(true);
-                }}
-                style={{ marginBottom: 32 }}
-              >
-                More options...
-              </Button>
-            ) : (
-              ''
-            )}
-
-            {showMore ? (
-              <>
-                <SocialLogIn
-                  network="google"
-                  label="Sign in with Google"
-                  backgroundColor="#FFFFFF"
-                  textColor="#888888"
-                  icon={GoogleIcon}
-                />
-                    <TextField
-                      style={{ marginBottom: 32 }}
-                      variant="outlined"
-                      id="email"
-                      label="Email"
-                      fullWidth
-                      onChange={e => setEmail(e.target.value)}
-                      onKeyPress={ev => {
-                        if (ev.key === 'Enter') {
-                          return handleEmailSignup();
-                          ev.preventDefault();
-                        }
-                      }}
-                      InputProps={{
-                        type: 'email',
-                        endAdornment: (
-                          <Button
-                            variant="contained"
-                            size="large"
-                            color="default"
-                            onClick={handleEmailSignup}
-                            style={{ height: '52px', borderRadius: '3px' }}
-                          >
-                            Go
-                          </Button>
-                        ),
-                      }}
-                    />
-              </>
-            ) : (
-              ''
-            )}
             {isSignIn ? (
-              ''
+              ""
             ) : (
-              <Box color="text.gray" style={{ maxWidth: 300, margin: '0 auto' }}>
+              <Box
+                color="text.gray"
+                style={{ maxWidth: 300, margin: "0 auto" }}
+              >
                 <Typography variant="caption">
-                  By signing up, you agree to the{' '}
+                  By signing up, you agree to the{" "}
                   <a href="/tos.html" target="blank">
                     Terms of Service
-                  </a>{' '}
-                  and{' '}
+                  </a>{" "}
+                  and{" "}
                   <a href="/privacy.html" target="blank">
                     Privacy Policy
                   </a>

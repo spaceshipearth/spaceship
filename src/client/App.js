@@ -100,7 +100,7 @@ const App = () => {
                 path="/"
                 component={() => {
                   return (
-                    <Link to="/">
+                    <Link to="/" style={{ textDecoration: "none" }}>
                       <Typography variant="h6" style={{ color: "white" }}>
                         Spaceship Earth
                       </Typography>

@@ -97,8 +97,8 @@ export default {
 
       await email.send({
         to: user.email,
-        subject: `Sign-in to 2020 Madness`,
-        text: `Click here to sign-in to 2020 Madness: ${signInUrl}`
+        subject: `Sign-in to Spaceship Earth`,
+        text: `Click here to sign-in to Spaceship Earth: ${signInUrl}`
       });
       return;
     },
