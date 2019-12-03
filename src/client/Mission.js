@@ -1,4 +1,5 @@
 import React from 'react';
+import {useState} from 'react';
 import './Home.css';
 import gql from 'graphql-tag';
 import {
@@ -35,6 +36,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import StepContent from '@material-ui/core/StepContent';
+import {absoluteUrl} from '../shared/util';
 
 export const missionQuery = gql`
   query Mission($id: ID!) {
@@ -78,31 +80,68 @@ export const joinMissionMutation = gql`
   }
 `;
 
+export const scheduleMissionMutation = gql`
+  mutation JoinMission($id: ID!, $startTime: Int!) {
+    scheduleMission(id: $id, startTime: $startTime) {
+      id
+      startTime
+    }
+  }
+`;
 
-function RecruitModule() {
-  return <SharePrompt shareMessage="Join my mission!" />;
+function RecruitModule({sharingUrl}) {
+  return (
+    <SharePrompt
+    sharingUrl="https://cnn.com/"
+      shareMessage={`Hey friends!  I know many of you are concerned about the climate emergency, but like me, unsure about what we can all do.
+
+I found a site that helps groups take the most impactful, research backed, actions for addressing climate change.
+
+Come check it out and join me for a climate mission:
+
+${sharingUrl}
+
+`}
+    />
+  );
 }
 
 
-function getSteps() {
+function getSteps(mission) {
+  function timeTill() {
+    const SECONDS_PER_HOUR = 60 * 60;
+    const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+    const deltaSeconds =  mission.startTime - Date.now()/1000;
+    return deltaSeconds > SECONDS_PER_DAY ? Math.floor(deltaSeconds/SECONDS_PER_DAY) + ' days' : Math.round(deltaSeconds/SECONDS_PER_HOUR) + ' hours';
+  }
+
   return [
     "Sign up to lead the mission",
     "Pick the start date",
     "Recruit your team",
-    "Mission starts in 3 days and 3 hours",
+    mission && mission.startTime
+      ? "Mission starts in " + timeTill()
+      : "Mission starts",
     "Mission ends"
   ];
 }
 
-function getStepContent(step) {
+const Steps = {
+  BECOME_CAPTAIN: 0,
+  SCHEDULE_START: 1,
+  RECRUIT_TEAM: 2,
+  START_MISSION: 3
+};
+
+function getStepContent(step, mission, onDateChange) {
   switch (step) {
-    case 0:
-      return `Cancel mission?`;
-    case 1:
-      return <MissionStartPicker/>
-    case 2:
-      return <RecruitModule/>;
-    case 3:
+    case Steps.BECOME_CAPTAIN:
+      return <Button>Cancel mission</Button>;
+    case Steps.SCHEDULE_START:
+      return <MissionStartPicker mission={mission} onChange={onDateChange} />;
+    case Steps.RECRUIT_TEAM:
+      return <RecruitModule sharingUrl={absoluteUrl({pathname:`/mission/${mission.id}`})} />;
+    case Steps.START_MISSION:
       return `Try out different ad text to see what brings in the most customers,
               and learn how to enhance your ads using features like ad extensions.
               If you run into any problems with your ads, find out how to tell if
@@ -112,11 +151,20 @@ function getStepContent(step) {
   }
 }
 
-function MissionProgressStepper({startTime}) {
-  const [activeStep, setActiveStep] = React.useState(startTime ? 2 : 1);
-  const steps = getSteps();
+function MissionProgressStepper({mission}) {
+  const [activeStep, setActiveStep] = useState(
+    mission.startTime ? Steps.RECRUIT_TEAM : Steps.SCHEDULE_START
+  );
+  const steps = getSteps(mission);
+  const [scheduleMission] = useMutation(scheduleMissionMutation);
+  const [proposedStartTime, setProposedStartTime] = useState(new Date(mission.startTime * 1000));
 
   const handleNext = () => {
+    if (activeStep == Steps.SCHEDULE_START) {
+      scheduleMission({
+        variables: { id: mission.id, startTime: proposedStartTime.getTime()/1000 }
+      });
+    }
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
 
@@ -128,29 +176,31 @@ function MissionProgressStepper({startTime}) {
     setActiveStep(0);
   };
 
+  const canAdvance = () => {
+    return activeStep == 1;
+  }
+
   return (
-    <div >
+    <div>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((label, index) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
             <StepContent>
-              <div>{getStepContent(index)}</div>
+              <div>{getStepContent(index, mission, setProposedStartTime)}</div>
               <div>
                 <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                  >
+                  <Button disabled={activeStep === 0} onClick={handleBack}>
                     Back
                   </Button>
+                  {canAdvance() ?
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={handleNext}
                   >
-                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                  </Button>
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button> : ''}
                 </div>
               </div>
             </StepContent>
@@ -160,21 +210,23 @@ function MissionProgressStepper({startTime}) {
       {activeStep === steps.length && (
         <Paper square elevation={0}>
           <Typography>All steps completed - you&apos;re finished</Typography>
-          <Button onClick={handleReset}>
-            Reset
-          </Button>
+          <Button onClick={handleReset}>Reset</Button>
         </Paper>
       )}
     </div>
   );
 }
 
-function MissionStartPicker() {
+const nextMonday = "2019-12-18T21:11:54";
+
+function MissionStartPicker({mission, onChange}) {
   const [selectedDate, setSelectedDate] = React.useState(
-    new Date("2019-08-18T21:11:54")
+    new Date((mission.startTime * 1000) || nextMonday)
   );
   const handleDateChange = date => {
     setSelectedDate(date);
+    // let parent component know
+    onChange(date);
   };
   return (
     <Box>
@@ -196,6 +248,7 @@ function MissionStartPicker() {
     </Box>
   );
 }
+
 function Mission({match}) {
 
   const [joinTeamMutation] = useMutation(joinMissionMutation);
@@ -239,7 +292,7 @@ function Mission({match}) {
             <Typography gutterBottom variant="h6">
               Mission Progress
             </Typography>
-            <MissionProgressStepper />
+            <MissionProgressStepper mission={mission} />
           </Paper>
         </Grid>
 

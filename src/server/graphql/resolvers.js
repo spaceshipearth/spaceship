@@ -5,24 +5,13 @@ import { ForbiddenError } from 'apollo-server-express';
 import { combineResolvers, skip } from 'graphql-resolvers';
 
 import Sequelize from 'sequelize';
-//import { absoluteUrl } from './../../shared/display';
+import { absoluteUrl } from './../../shared/util';
 import * as models from './../db/models';
 import * as email from './../email';
 import * as nanoid from 'nanoid';
 import { createUser } from './../auth';
 import _ from 'lodash';
-import url from 'url';
 
-
-export function absoluteUrl({pathname, query}) {
-  return url.format({
-    protocol: process.env.APP_PROTOCOL,
-    hostname: process.env.APP_HOST,
-    port: process.env.APP_PORT ? process.env.APP_PORT : '',
-    pathname,
-    query,
-  });
-}
 
 
 const USER_NOT_DELETED = { deletionToken: { [models.Sequelize.Op.eq]: '' } };
@@ -67,6 +56,9 @@ export default {
     },
     captain: async (parent, {}, {}) => {
       return models.User.findOne({ where: { id: parent.captainId } });
+    },
+    startTime: async (parent, {}, {}) => {
+      return parent.startTime.getTime() / 1000;
     },
     team: async (parent, {}, {}) => {
       const userMissions = await models.UserMission.findAll({
@@ -129,6 +121,10 @@ export default {
         goalId: goalId,
         captainId: currentUser.id
       });
+    },
+    scheduleMission: async (_, { id, startTime }, { req, res, currentUser }) => {
+      await models.Mission.update({startTime: startTime*1000}, {where:{id}});
+      return models.Mission.findByPk(id);
     },
     joinMission: async (_, { id }, { req, res, currentUser }) => {
       // TODO: enforce uniqueness in the DB

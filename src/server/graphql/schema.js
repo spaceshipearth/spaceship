@@ -70,6 +70,7 @@ const schema = gql`
     deleteGoal(id: ID!): Boolean
 
     joinMission(id: ID!): Mission
+    scheduleMission(id: ID!, startTime: Int): Mission
   }
 `;
 

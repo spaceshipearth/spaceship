@@ -9,7 +9,6 @@ import Input from '@material-ui/core/Input';
 export function SocialShareButtons({
   user,
   forEmail,
-  optTrade,
   size,
   justifyContent,
   textButtons,
@@ -118,7 +117,7 @@ function SocialShareButton({ network, size, label, backgroundColor, textColor, i
       shareMessage
     )}`;
   } else if (network == 'email') {
-    shareUrl = `mailto:?subject=${encodeURIComponent('Check this out')}&body=${encodeURIComponent(shareMessage)}`;
+    shareUrl = `mailto:?subject=${encodeURIComponent('Join me!')}&body=${encodeURIComponent(shareMessage)}`;
   }
 
   function handleClick() {
@@ -185,7 +184,7 @@ function SocialShareButton({ network, size, label, backgroundColor, textColor, i
           style={iconStyle}
         />
       </span>
-      <Typography variant="button" style={{ paddingLeft: 25, paddingRight: 10 }}>
+      <Typography variant="button" style={{ paddingLeft: 25, paddingRight: 10, lineHeight: 1 }}>
         {label}
       </Typography>
     </Button>
@@ -196,28 +195,30 @@ function SocialShareButton({ network, size, label, backgroundColor, textColor, i
   );
 }
 
-export function SharePrompt({ shareMessage, shareUrl, user }) {
+export function SharePrompt({ shareMessage, sharingUrl, user }) {
   const [customShareMessage, setCustomShareMessage] = React.useState(shareMessage);
   const [focused, setFocused] = React.useState(false);
 
   return (
     <>
-      <h4 style={{ marginBottom: 16, marginTop: 10 }}>Share with your friends </h4>
+      <h4 style={{ marginBottom: 16, marginTop: 10 }}>
+        Share with your friends{" "}
+      </h4>
       <Input
         id="sharing-message"
         multiline
-        rows={6}
+        rows={10}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onChange={e => setCustomShareMessage(e.target.value)}
         style={{
           fontSize: 14,
-          width: '100%',
+          width: "100%",
           borderRadius: 5,
-          border: focused ? '1px solid #5C29D4' : '1px solid #ccc',
+          border: focused ? "1px solid #5C29D4" : "1px solid #ccc",
           padding: 8,
           lineHeight: 1.5,
-          backgroundColor: 'white',
+          backgroundColor: "white"
         }}
         disableUnderline={true}
         value={customShareMessage}
@@ -228,8 +229,8 @@ export function SharePrompt({ shareMessage, shareUrl, user }) {
           alwaysColorful={true}
           textButtons={true}
           twitterHandleInsteadOfName={true}
-          customShareMessage={customShareMessage}
-          customSharingUrl={shareUrl}
+          shareMessage={customShareMessage}
+          sharingUrl={sharingUrl}
         />
       </Box>
     </>
