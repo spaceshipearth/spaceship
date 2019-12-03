@@ -192,8 +192,8 @@ export function Signup(props) {
   // If props.children is provided we wrap that in a clickable box
   // intead of the [Sign up] button.  This allows eg. the [Join] button
   // to trigger a sign up dialog.
-  const signupButton = props.children && !props.isSignedIn ?
-        <Box onClick={handleSignupClick}>{props.children}</Box> :
+  const signupButton = props.children ?
+        <Box onClick={props.isSignedIn ? null : handleSignupClick}>{props.children}</Box> :
         <Button
           variant={variant}
           color={color}
