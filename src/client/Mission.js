@@ -115,13 +115,20 @@ function getSteps(mission) {
     return deltaSeconds > SECONDS_PER_DAY ? Math.floor(deltaSeconds/SECONDS_PER_DAY) + ' days' : Math.round(deltaSeconds/SECONDS_PER_HOUR) + ' hours';
   }
 
+  let missionStartStep = "Mission starts";
+  if (mission && mission.startTime) {
+    if (mission.startTime * 1000 < Date.now()) {
+      missionStartStep = "Mission has started";
+    } else {
+      missionStartStep = "Mission starts in " + timeTill();
+    }
+  }
+
   return [
     "Sign up to lead the mission",
     "Pick the start date",
     "Recruit your team",
-    mission && mission.startTime
-      ? "Mission starts in " + timeTill()
-      : "Mission starts",
+    missionStartStep,
     "Mission ends"
   ];
 }
@@ -134,6 +141,8 @@ const Steps = {
 };
 
 function getStepContent(step, mission, onDateChange) {
+  const dayOfMission = 1;
+  const missionDays = 7;
   switch (step) {
     case Steps.BECOME_CAPTAIN:
       return <Button>Cancel mission</Button>;
@@ -142,19 +151,33 @@ function getStepContent(step, mission, onDateChange) {
     case Steps.RECRUIT_TEAM:
       return <RecruitModule sharingUrl={absoluteUrl({pathname:`/mission/${mission.id}`})} />;
     case Steps.START_MISSION:
-      return `Try out different ad text to see what brings in the most customers,
-              and learn how to enhance your ads using features like ad extensions.
-              If you run into any problems with your ads, find out how to tell if
-              they're running and how to resolve approval issues.`;
+      return (
+        <Box>
+          {" "}
+          <Typography>The mission has begun!</Typography> <br />{" "}
+          <Typography>
+            Every day the team will get a reminder email to{" "}
+            <b>{mission.goal.shortDescription.toLowerCase()}</b>.
+          </Typography>
+          <br/>
+          <Typography>
+          Reply-all with any updates and photos!
+          </Typography>
+        </Box>
+      );
     default:
       return "Unknown step";
   }
 }
 
 function MissionProgressStepper({mission}) {
-  const [activeStep, setActiveStep] = useState(
-    mission.startTime ? Steps.RECRUIT_TEAM : Steps.SCHEDULE_START
-  );
+  let initialActiveStep = Steps.SCHEDULE_START;
+  if (mission.startTime && (Date.now() >  mission.startTime * 1000)) {
+    initialActiveStep = Steps.START_MISSION;
+  } else if (mission.startTime) {
+    initialActiveStep = Steps.RECRUIT_TEAM;
+  }
+  const [activeStep, setActiveStep] = useState(initialActiveStep);
   const steps = getSteps(mission);
   const [scheduleMission] = useMutation(scheduleMissionMutation);
   const [proposedStartTime, setProposedStartTime] = useState(new Date(mission.startTime * 1000));

@@ -75,7 +75,6 @@ function ObjectEditor({title, object, fields, upsertMutation, deleteMutation}) {
   // when one of the fields changes, we update fieldsState
   function onFieldChange(event) {
     const { target: { name, value } } = event;
-    console.log(event.target.type);
     const update = {};
     if (event.target.type == 'number') {
       update[name] = parseInt(value);

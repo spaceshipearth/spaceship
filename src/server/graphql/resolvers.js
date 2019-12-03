@@ -34,16 +34,18 @@ export default {
     mission: async (parent, { id }, {}) => {
       return models.Mission.findByPk(id);
     },
-    upcomingMissions: async (parent, { id }, {currentUser}) => {
+    upcomingMissions: async (parent, { id }, { currentUser }) => {
       const captainedMissions = await models.Mission.findAll({
         where: { captainId: currentUser.id }
       });
       const joinedMissionUserRows = await models.UserMission.findAll({
         where: { userId: currentUser.id }
       });
-      const joinedMissions = await models.Mission.findAll({where:{id: joinedMissionUserRows.map(mu=>mu.missionId)}});
+      const joinedMissions = await models.Mission.findAll({
+        where: { id: joinedMissionUserRows.map(mu => mu.missionId) }
+      });
       return captainedMissions.concat(joinedMissions).filter(m => m.startTime);
-    },
+    }
   },
   Category: {
     goals: async (parent, {}, {}) => {
@@ -58,7 +60,10 @@ export default {
       return models.User.findOne({ where: { id: parent.captainId } });
     },
     startTime: async (parent, {}, {}) => {
-      return parent.startTime.getTime() / 1000;
+      return parent.startTime && parent.startTime.getTime() / 1000;
+    },
+    endTime: async (parent, {}, {}) => {
+      return parent.endTime && parent.endTime.getTime() / 1000;
     },
     team: async (parent, {}, {}) => {
       const userMissions = await models.UserMission.findAll({
@@ -116,14 +121,20 @@ export default {
       delete req.session.currentUserId;
       return currentUser.id;
     },
-    planMission: async (_, { goalId }, { req, res, currentUser }) => {
+    planMission: async (_, { goalId }, { currentUser }) => {
       return models.Mission.create({
         goalId: goalId,
         captainId: currentUser.id
       });
     },
-    scheduleMission: async (_, { id, startTime }, { req, res, currentUser }) => {
-      await models.Mission.update({startTime: startTime*1000}, {where:{id}});
+    scheduleMission: async (_, { id, startTime }, { }) => {
+      await models.Mission.update(
+        {
+          startTime: startTime * 1000,
+          endTime: 1000 * (startTime + 7 * 24 * 60 * 60)
+        },
+        { where: { id } }
+      );
       return models.Mission.findByPk(id);
     },
     joinMission: async (_, { id }, { req, res, currentUser }) => {
