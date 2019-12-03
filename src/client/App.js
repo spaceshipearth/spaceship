@@ -4,6 +4,7 @@ import './App.css';
 import gql from "graphql-tag";
 import { useQuery } from 'react-apollo';
 import Dashboard from './Dashboard';
+import AdminMissionEditor from './Admin';
 import {SignOutMenuItem} from './Signin';
 import Mission from './Mission';
 import {
@@ -123,6 +124,7 @@ const App = () => {
         <Switch>
           <Route exact path="/" component={Dashboard} />
           <Route exact path="/mission/:missionId" component={Mission} />
+          <Route exact path="/admin" component={AdminMissionEditor} />
         </Switch>
       </>
     );

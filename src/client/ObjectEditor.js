@@ -21,13 +21,14 @@ import {stateToHTML} from 'draft-js-export-html';
 function DraftJSTextField({ margin, fullWidth, label, name, value, onChange}) {
   //
   const blocksFromHTML = convertFromHTML(value);
-  const contentState = ContentState.createFromBlockArray(
+  let contentState = ContentState.createFromBlockArray(
     blocksFromHTML.contentBlocks,
     blocksFromHTML.entityMap
   );
 
+  // handles empty block map
   const [editorState, setEditorState] = React.useState(
-    EditorState.createWithContent(contentState)
+    contentState.getBlockMap().size ? EditorState.createWithContent(contentState) : EditorState.createEmpty()
   );
 
   function handleChange(newEditorState) {
@@ -64,23 +65,33 @@ function DraftJSTextField({ margin, fullWidth, label, name, value, onChange}) {
 // General purpose DB object editor in a Dialog
 // We can leverage this in the future to let users define own goals
 // `fields` specifies the shape of the object (see CategoryEditor)
-function ObjectEditor({title, object, fields, upsertMutation}) {
+function ObjectEditor({title, object, fields, upsertMutation, deleteMutation}) {
   const [open, setOpen] = React.useState(false);
   // fieldsState is a dict that tracks the object as it's edited
   const [fieldsState, setFieldsState] = React.useState(object || {});
   const [upsertObject] = useMutation(upsertMutation);
+  const [deleteObject] = useMutation(deleteMutation);
 
   // when one of the fields changes, we update fieldsState
   function onFieldChange(event) {
     const { target: { name, value } } = event;
+    console.log(event.target.type);
     const update = {};
-    update[name] = value;
+    if (event.target.type == 'number') {
+      update[name] = parseInt(value);
+    } else {
+      update[name] = value;
+    }
     const newFieldsState = { ...fieldsState, ...update };
     setFieldsState(newFieldsState);
   }
 
   function handleSave() {
     upsertObject({ variables: fieldsState });
+    setOpen(false);
+  }
+  function handleDelete() {
+    deleteObject({ variables: fieldsState });
     setOpen(false);
   }
 
@@ -94,7 +105,7 @@ function ObjectEditor({title, object, fields, upsertMutation}) {
   return (
     <div>
       <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-        edit
+        {object ? "edit" : "create"}
       </Button>
       <Dialog open={open} onClose={handleClose} aria-label={title}>
         <DialogTitle>{title}</DialogTitle>
@@ -105,7 +116,7 @@ function ObjectEditor({title, object, fields, upsertMutation}) {
                 key={fieldInfo.name}
                 name={fieldInfo.name}
                 label={fieldInfo.label}
-                value={fieldsState[fieldInfo.name]}
+                value={fieldsState[fieldInfo.name] || ""}
                 margin="denser"
                 onChange={onFieldChange}
                 fullWidth
@@ -119,7 +130,7 @@ function ObjectEditor({title, object, fields, upsertMutation}) {
                 label={fieldInfo.label}
                 type={fieldInfo.type}
                 fullWidth
-                value={fieldsState[fieldInfo.name]}
+                value={fieldsState[fieldInfo.name] || ""}
                 onChange={onFieldChange}
               />
             )
@@ -128,6 +139,9 @@ function ObjectEditor({title, object, fields, upsertMutation}) {
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
+          </Button>
+          <Button onClick={handleDelete} color="primary">
+            Delete
           </Button>
           <Button onClick={handleSave} color="primary">
             Save
@@ -162,12 +176,18 @@ export function CategoryEditor({ category }) {
       }
     }
   `;
+  const deleteCategoryMutation = gql`
+    mutation DeleteCategory($id: ID!) {
+        deleteCategory(id: $id)
+    }
+  `;
 
   return (
     <ObjectEditor
-      title="Edit Category"
+      title={category ? "Edit Category" : "Create Category"}
       object={category}
       upsertMutation={upsertCategoryMutation}
+      deleteMutation={deleteCategoryMutation}
       fields={[
         { name: "id", label: "Human readable id" },
         { name: "title", label: "Title" },
@@ -212,11 +232,18 @@ export function GoalEditor({ goal }) {
     }
   `;
 
+  const deleteGoalMutation = gql`
+    mutation DeleteGoal($id: ID!) {
+      deleteGoal(id: $id)
+    }
+  `;
+
   return (
     <ObjectEditor
-      title="Edit Goal"
+      title={goal ? "Edit Goal" : "Create Goal"}
       object={goal}
       upsertMutation={upsertGoalMutation}
+      deleteMutation={deleteGoalMutation}
       fields={[
         { name: "id", label: "Human readable id" },
         { name: "title", label: "Title" },
