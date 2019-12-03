@@ -20,6 +20,7 @@ import {
 } from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Switch, Route, Link } from "react-router-dom";
+import AvatarPng from "../../public/avatar.png";
 
 export const currentUserQuery = gql`
   query CurrentUser {
@@ -58,7 +59,7 @@ function ProfileMenu() {
       >
         <Avatar
           alt={currentUser.name}
-          src={currentUser.photoUrl}
+          src={currentUser.photoUrl || AvatarPng}
         />
       </Button>
       <Menu
@@ -132,6 +133,7 @@ const App = () => {
     return (
       <Switch>
         <Route exact path="/" component={Home} />
+        <Route exact path="/mission/:missionId" component={Mission} />
       </Switch>
     );
   }

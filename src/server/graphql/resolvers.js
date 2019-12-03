@@ -11,21 +11,17 @@ import * as email from './../email';
 import * as nanoid from 'nanoid';
 import { createUser } from './../auth';
 import _ from 'lodash';
-
-/*const imgixClient = new ImgixClient({
-  domain: 'spaceship.imgix.net',
-  secureURLToken: process.env.IMGIX_SECRET,
-});*/
+import url from 'url';
 
 
-export function absoluteUrl(path) {
-  if (typeof window != "undefined" && window.location) {
-    return window.location.origin + path;
-  } else {
-    return `${process.env.APP_PROTOCOL}://${process.env.APP_HOST}${
-      process.env.APP_PORT ? ":" + process.env.APP_PORT : ""
-    }${path}`;
-  }
+export function absoluteUrl({pathname, query}) {
+  return url.format({
+    protocol: process.env.APP_PROTOCOL,
+    hostname: process.env.APP_HOST,
+    port: process.env.APP_PORT ? process.env.APP_PORT : '',
+    pathname,
+    query,
+  });
 }
 
 
@@ -48,7 +44,17 @@ export default {
     },
     mission: async (parent, { id }, {}) => {
       return models.Mission.findByPk(id);
-    }
+    },
+    upcomingMissions: async (parent, { id }, {currentUser}) => {
+      const captainedMissions = await models.Mission.findAll({
+        where: { captainId: currentUser.id }
+      });
+      const joinedMissionUserRows = await models.UserMission.findAll({
+        where: { userId: currentUser.id }
+      });
+      const joinedMissions = await models.Mission.findAll({where:{id: joinedMissionUserRows.map(mu=>mu.missionId)}});
+      return captainedMissions.concat(joinedMissions).filter(m => m.startTime);
+    },
   },
   Category: {
     goals: async (parent, {}, {}) => {
@@ -63,12 +69,19 @@ export default {
       return models.User.findOne({ where: { id: parent.captainId } });
     },
     team: async (parent, {}, {}) => {
-      //const userMissions = await models.UserMission.findAll({ where: { missionId: parent.id }});
-      return;
+      const userMissions = await models.UserMission.findAll({
+        where: { missionId: parent.id }
+      });
+      const captain = await models.User.findByPk(parent.captainId);
+      const team = await models.User.findAll({
+        where: { id: userMissions.map(um => um.userId) }
+      });
+      team.push(captain);
+      return team;
     }
   },
   Mutation: {
-    signIn: async (parent, { email: userEmail }, { req }) => {
+    signIn: async (_, { email: userEmail, cont }, { req }) => {
       const whereClause = Object.assign({}, { email: userEmail });
       // todo validate email
       let user = await models.User.findOne({ where: whereClause });
@@ -80,11 +93,10 @@ export default {
       }
       user.password = nanoid(10);
       await user.save();
-      const signInUrl = absoluteUrl(
-        `/auth/signin?email=${encodeURIComponent(
-          user.email
-        )}&token=${encodeURIComponent(user.password)}`
-      );
+      const signInUrl = absoluteUrl({
+        pathname: "/auth/signin",
+        query: { email: user.email, token: user.password, cont }
+      });
 
       await email.send({
         to: user.email,
@@ -93,24 +105,38 @@ export default {
       });
       return;
     },
-    upsertCategory: async (parent, args, { req, res, currentUser }) => {
+    upsertCategory: async (_, args, { req, res, currentUser }) => {
       await models.Category.upsert(args);
       return models.Category.findByPk(args.id);
     },
-    upsertGoal: async (parent, args, { req, res, currentUser }) => {
+    deleteCategory: async (_, { id }, { req, res, currentUser }) => {
+      return models.Category.destroy({ where: { id } });
+    },
+    deleteGoal: async (_, { id }, { req, res, currentUser }) => {
+      return models.Goal.destroy({ where: { id } });
+    },
+    upsertGoal: async (_, args, { req, res, currentUser }) => {
       await models.Goal.upsert(args);
       return models.Goal.findByPk(args.id);
     },
-    signOut: async (parent, {}, { req, res, currentUser }) => {
+    signOut: async (_, {}, { req, res, currentUser }) => {
       delete res.locals.currentUser;
       delete req.session.currentUserId;
       return currentUser.id;
     },
-    planMission: async (parent, { goalId }, { req, res, currentUser }) => {
+    planMission: async (_, { goalId }, { req, res, currentUser }) => {
       return models.Mission.create({
         goalId: goalId,
         captainId: currentUser.id
       });
+    },
+    joinMission: async (_, { id }, { req, res, currentUser }) => {
+      // TODO: enforce uniqueness in the DB
+      await models.UserMission.create({
+        userId: currentUser.id,
+        missionId: id
+      });
+      return models.Mission.findByPk(id);
     }
   }
 };

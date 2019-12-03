@@ -15,8 +15,8 @@ import { CloseButton } from './components';
 import { useMutation } from 'react-apollo';
 
 const signInMutation = gql`
-  mutation signIn($email: String!) {
-    signIn(email: $email)
+  mutation signIn($email: String!, $cont: String) {
+    signIn(email: $email, cont: $cont)
   }
 `;
 const signOutMutation = gql`
@@ -50,7 +50,7 @@ export function SigninSignupDialog({ onClose, isSignIn }) {
   const [signIn, { data }] = useMutation(signInMutation);
 
   function handleEmailSignup(ev) {
-    signIn({variables:{email}});
+    signIn({variables:{email, cont: window.location.href }});
     setShowSnackbar(true);
     setShowDialog(false);
   }
@@ -185,19 +185,29 @@ export function Signup(props) {
   const variant = props.variant || 'contained';
   const color = props.color || 'primary';
   const text = props.text || 'Sign up';
+  function handleSignupClick () {
+    setShowDialog(true);
+  }
+
+  // If props.children is provided we wrap that in a clickable box
+  // intead of the [Sign up] button.  This allows eg. the [Join] button
+  // to trigger a sign up dialog.
+  const signupButton = props.children && !props.isSignedIn ?
+        <Box onClick={handleSignupClick}>{props.children}</Box> :
+        <Button
+          variant={variant}
+          color={color}
+          onClick={handleSignupClick}
+          size={props.size}
+          style={props.style}
+        >
+          {text}
+        </Button>
+      ;
+
   return (
     <>
-      <Button
-        variant={variant}
-        color={color}
-        onClick={() => {
-          setShowDialog(true);
-        }}
-        size={props.size}
-        style={props.style}
-      >
-        {text}
-      </Button>
+      {signupButton}
       {showDialog ? (
         <SigninSignupDialog
           isSignIn={props.isSignIn}
@@ -267,7 +277,7 @@ export function SocialLogIn({ network, label, backgroundColor, textColor, icon }
         justifyContent: 'flex-start',
       }}
       onClick={() => {
-        window.location = `/auth/connect/${network}`;
+        window.location = `/auth/connect/${network}?cont=${encodeURIComponent(window.location.href)}`;
       }}
     >
       <span style={{ width: '30px', height: '30px' }}>

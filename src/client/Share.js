@@ -1,7 +1,5 @@
-import { absoluteUrl, FormattedTrade, CDN } from './../shared/display';
 import { Color } from './../shared/theme';
 import { EmailIcon, FacebookIcon, TwitterIcon } from 'react-share';
-import isMobile from 'is-mobile';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import ShareIcon from '@material-ui/icons/Share';
@@ -30,11 +28,11 @@ export function SocialShareButtons({
   }
 
   const emojilessShareMessage = shareMessage
-    ? customShareMessage.replace(
+    ? shareMessage.replace(
         /([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-        ''
+        ""
       )
-    : '';
+    : "";
 
   return (
     <div
@@ -61,7 +59,7 @@ export function SocialShareButtons({
         <SocialShareButton
           network="email"
           size={size}
-          shareMessage={customShareMessage || sharingMessage.twitter}
+          shareMessage={shareMessage}
           label={textButtons ? "Email" : ""}
           url={sharingUrl + "?via=em"}
           backgroundColor={Color.GOLD}
@@ -72,7 +70,7 @@ export function SocialShareButtons({
       <SocialShareButton
         network="twitter"
         size={size}
-        shareMessage={customShareMessage || sharingMessage.twitter}
+        shareMessage={shareMessage}
         url={sharingUrl + "?via=tw"}
         label={textButtons ? "Tweet" : ""}
         backgroundColor="#1da1f2"

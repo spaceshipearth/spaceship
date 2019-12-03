@@ -1,29 +1,50 @@
 import React from 'react';
-import EarthJpg from '../../public/earth.jpg';
 import './Home.css';
 import gql from 'graphql-tag';
-import { Container,  Grid, Card, CardActionArea, CardContent, CardMedia, CardActions, Typography, Button, Box } from '@material-ui/core';
+import { Avatar, Divider, Container, List,ListItem, Grid, Card, CardActionArea, CardContent, CardMedia, CardActions, Typography,Paper, Button, Box, ListItemText, ListItemIcon, ListItemSecondaryAction, ListItemAvatar } from '@material-ui/core';
 import { useQuery, useMutation } from 'react-apollo';
-import {CategoryEditor, GoalEditor} from './ObjectEditor';
+import { Link, Redirect } from 'react-router-dom';
 
-export const goalsQuery = gql`
-  query Missions {
-    categories {
+export const dashboardQuery = gql`
+query Dashboard {
+  upcomingMissions {
+    id
+    goal {
       id
       title
-      displayRank
       shortDescription
       longDescription
-      goals {
-        id
-        title
-        shortDescription
-        longDescription
-        displayRank
-        categoryId
-      }
+      displayRank
+      categoryId
+    }
+    captain {
+      id
+    name
+    }
+    team {
+      id
+      name
+    }
+    startTime
+    endTime
+  }
+
+  categories {
+    id
+    title
+    displayRank
+    shortDescription
+    longDescription
+    goals {
+      id
+      title
+      shortDescription
+      longDescription
+      displayRank
+      categoryId
     }
   }
+}
 `;
 
 
@@ -36,25 +57,42 @@ export const planMissionMutation = gql`
 `;
 
 function Dashboard() {
-  const {data, loading, error} = useQuery(goalsQuery);
+  const { data, loading, error } = useQuery(dashboardQuery);
   if (loading) {
     return '';
   }
 
   return (
     <Container maxWidth="md" style={{ marginTop: 50 }}>
+      <Paper style={{ padding: 16 }}>
+        <Typography variant="h5">My Missions</Typography>
+        {data.upcomingMissions.length ? (
+          <List>
+            {data.upcomingMissions.map(mission => (
+              <MissionRow key={mission.id} mission={mission} />
+            ))}
+          </List>
+        ) : (
+          <Typography>
+            No missions planned yet, pick a mission goal below to get started!
+          </Typography>
+        )}
+      </Paper>
+
+      <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+
       {data.categories
         .filter(c => c.goals.length)
+        .sort((a, b) => a.displayRank - b.displayRank)
         .map(category => (
           <Box style={{ marginBottom: 64 }} key={category.id}>
-            <Typography variant="h2">
-              {category.title}
-              <CategoryEditor category={category} />
-            </Typography>
+            <Typography variant="h2">{category.title}</Typography>
             <Grid container>
-              {category.goals.map(goal => (
-                <GoalCard key={goal.id} goal={goal} />
-              ))}
+              {category.goals
+                .sort((a, b) => a.displayRank - b.displayRank)
+                .map(goal => (
+                  <GoalCard key={goal.id} goal={goal} />
+                ))}
             </Grid>
           </Box>
         ))}
@@ -84,7 +122,11 @@ const cardStyle =  {
 };
 
 function GoalCard({goal}) {
-  const [planMission, {data}] = useMutation(planMissionMutation);
+  const [planMission, mutationResult] = useMutation(planMissionMutation);
+
+  if (mutationResult && mutationResult.data) {
+    return <Redirect to={`/mission/${mutationResult.data.planMission.id}`} />;
+  }
 
   function handlePlanMissionClick() {
     planMission({variables:{goalId: goal.id}});
@@ -108,15 +150,37 @@ function GoalCard({goal}) {
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Button size="small" color="secondary">
-          Learn More
-        </Button>
         <Button size="small" color="primary" onClick={handlePlanMissionClick}>
           Plan Mission
         </Button>
-        <GoalEditor goal={goal} />
       </CardActions>
     </Grid>
+  );
+}
+
+function MissionRow({ mission }) {
+  return (
+    <ListItem
+      divider
+      button
+      component={Link}
+      to={`/mission/${mission.id}`}
+    >
+      <ListItemAvatar>
+        <Avatar
+          variant="square"
+          src="https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg"
+        />
+      </ListItemAvatar>
+      <ListItemText
+        primary={mission.goal.title}
+        secondary={
+          mission.team.map(u => u.name).join(",") +
+          " - " +
+          mission.goal.shortDescription
+        }
+      />
+    </ListItem>
   );
 }
 

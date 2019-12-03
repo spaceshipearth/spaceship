@@ -61,10 +61,11 @@ export const Service = {
   NATIVE: 3,
 };
 
-function signIn(req, res, user) {
+function signIn(req, res, user, cont) {
   req.session.currentUserId = user.id;
-  if (req.session.cont) {
-    return res.redirect(`${req.session.cont}`);
+  cont = cont || req.session.cont;
+  if (cont) {
+    return res.redirect(`${cont}`);
   }
   return res.redirect('/');
 }
@@ -75,7 +76,7 @@ router.get('/signin', async (req, res) => {
     if (user) {
       // user.password = null;
       // await user.save();
-      return signIn(req, res, user);
+      return signIn(req, res, user, req.query.cont);
     }
   }
   res.send('Oops, this sign-in link has expired!');

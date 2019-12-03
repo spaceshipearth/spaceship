@@ -34,17 +34,23 @@ const schema = gql`
     goal: Goal
     captain: User
     team: [User]
+    startTime: Int
+    endTime: Int
   }
 
   type Query {
     currentUser: User
     categories: [Category]
+    upcomingMissions: [Mission]
+    completedMissions: [Mission]
     mission(id: ID!): Mission
   }
+
   type Mutation {
-    signIn(email: String!): Int
+    signIn(email: String!, cont: String): Int
     signOut: ID
     planMission(goalId: ID!): Mission
+
     upsertCategory(
       id: ID
       title: String
@@ -52,6 +58,7 @@ const schema = gql`
       shortDescription: String
       longDescription: String
     ): Category
+    deleteCategory(id: ID!): Boolean
     upsertGoal(
       id: ID
       title: String
@@ -60,6 +67,9 @@ const schema = gql`
       displayRank: Int
       categoryId: ID
     ): Goal
+    deleteGoal(id: ID!): Boolean
+
+    joinMission(id: ID!): Mission
   }
 `;
 
