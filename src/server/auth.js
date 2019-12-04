@@ -36,7 +36,7 @@ const grantConfig = {
   facebook: {
     key: process.env.FACEBOOK_KEY,
     secret: process.env.FACEBOOK_SECRET,
-    scope: ['public_profile', 'email', 'user_friends'],
+    scope: ['public_profile', 'email'],
     callback: '/auth/facebook-authed',
   },
   twitter: {
