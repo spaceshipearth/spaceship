@@ -137,7 +137,7 @@ function GoalCard({goal}) {
       <CardActionArea>
         <CardMedia
           style={{ height: 140 }}
-          image="https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg"
+          image={`/goals/${goal.id}.jpg`}
           title={goal.title}
         />
         <CardContent>

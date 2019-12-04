@@ -292,7 +292,7 @@ function Mission({match}) {
       <Card key={mission.goal.id}>
         <CardMedia
           style={{ height: 140 }}
-          image="https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg"
+          image={`/goals/${mission.goal.id}.jpg`}
           title={mission.goal.title}
         />
         <CardContent>
@@ -325,11 +325,7 @@ function Mission({match}) {
               Team
             </Typography>
             <WithSignup isSignedIn={data.currentUser}>
-              <Button
-                size="small"
-                color="secondary"
-                onClick={handleJoinClick}
-              >
+              <Button size="small" color="secondary" onClick={handleJoinClick}>
                 Join
               </Button>
             </WithSignup>
