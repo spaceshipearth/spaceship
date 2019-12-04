@@ -310,7 +310,7 @@ function Mission({match}) {
         <CardActions></CardActions>
       </Card>
       <Grid container style={{ marginTop: 10 }} spacing={3}>
-        <Grid item xs={8}>
+        <Grid item xs={12} md={8}>
           <Paper style={{ padding: 16 }}>
             <Typography gutterBottom variant="h6">
               Mission Progress
@@ -318,8 +318,7 @@ function Mission({match}) {
             <MissionProgressStepper mission={mission} />
           </Paper>
         </Grid>
-
-        <Grid item xs={4}>
+        <Grid item xs={12} md={4}>
           <Paper style={{ padding: 16 }}>
             <Typography gutterBottom variant="h6">
               Team
