@@ -12,8 +12,6 @@ import * as nanoid from 'nanoid';
 import { createUser } from './../auth';
 import _ from 'lodash';
 
-
-
 const USER_NOT_DELETED = { deletionToken: { [models.Sequelize.Op.eq]: '' } };
 
 const isAuthenticated = (parent, args, { currentUser }) => {

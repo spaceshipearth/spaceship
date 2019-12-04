@@ -8,7 +8,7 @@ export async function send({ to, subject, text, html }) {
     Destination: {
       /* required */
       CcAddresses: [],
-      ToAddresses: [to]
+      ToAddresses: to.split(',')
     },
     Message: {
       /* required */
