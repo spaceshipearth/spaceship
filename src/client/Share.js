@@ -228,9 +228,6 @@ export function SharePrompt({ shareMessage, sharingUrl, user }) {
 
   return (
     <>
-      <h4 style={{ marginBottom: 16, marginTop: 10 }}>
-        Share with your friends{" "}
-      </h4>
       <Input
         id="sharing-message"
         multiline
