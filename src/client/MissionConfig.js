@@ -86,7 +86,6 @@ export function MissionCreateStepper({mission}) {
 
   const handleNext = () => {
     if (activeStep == CreateMissionSteps.SCHEDULE_START) {
-      alert(proposedStartTime);
       scheduleMission({
         variables: {
           id: mission.id,
