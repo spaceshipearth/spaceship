@@ -1,10 +1,12 @@
 import { Color } from './../shared/theme';
 import { EmailIcon, FacebookIcon, TwitterIcon } from 'react-share';
 import React from 'react';
+import {useRef} from 'react';
 import { renderToString } from 'react-dom/server';
 import ShareIcon from '@material-ui/icons/Share';
 import { Box, Button, Typography, TextField, IconButton } from '@material-ui/core';
 import Input from '@material-ui/core/Input';
+import copyToCliboard from "clipboard-copy";
 
 export function SocialShareButtons({
   user,
@@ -17,9 +19,16 @@ export function SocialShareButtons({
   sharingUrl,
 }) {
   const [shouldRender, setShouldRender] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+
   React.useEffect(() => {
     setShouldRender(true);
   });
+
+  function handleCopyToClipboard() {
+    copyToCliboard(shareMessage);
+    setCopied(true);
+  }
 
   if (!shouldRender && !forEmail) {
     // Don't render SSR because we have diff. renderings based on mobile vs. desktop.
@@ -52,7 +61,7 @@ export function SocialShareButtons({
         forEmail={forEmail}
         icon={FacebookIcon}
       />
-      {forEmail ? (
+      {forEmail || true /* hide */ ? (
         ""
       ) : (
         <SocialShareButton
@@ -77,6 +86,22 @@ export function SocialShareButtons({
         forEmail={forEmail}
         icon={TwitterIcon}
       />
+      <Button
+        style={{
+          backgroundColor: Color.GOLD,
+          color: "white",
+          borderRadius: SHARE_BUTTON_HEIGHT/2,
+          height: SHARE_BUTTON_HEIGHT
+        }}
+        onClick={handleCopyToClipboard}
+      >
+        <Typography
+          variant="button"
+          style={{ paddingLeft: 10, paddingRight: 10, lineHeight: 1 }}
+        >
+          {copied ? "Copied to Clipboard" : "Copy to Clipboard"}
+        </Typography>
+      </Button>
     </div>
   );
 }
@@ -100,6 +125,8 @@ const WINDOW_CONFIG = {
   chrome: 'yes',
 };
 
+const SHARE_BUTTON_HEIGHT = 30;
+
 function SocialShareButton({ network, size, label, backgroundColor, textColor, icon, url, shareMessage, forEmail }) {
   const isNativeShare = false; // TODO(mime): disabled for now. network == 'email' && isMobile() && navigator.share !== undefined;
   if (isNativeShare) {
@@ -107,7 +134,7 @@ function SocialShareButton({ network, size, label, backgroundColor, textColor, i
   }
 
   const Icon = icon;
-  size = size || 30;
+  size = size || SHARE_BUTTON_HEIGHT;
 
   let shareUrl;
   if (network == 'twitter') {

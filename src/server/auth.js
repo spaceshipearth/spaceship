@@ -222,7 +222,6 @@ async function handleAuthed(
   authedIdentity,
   { photoUrl, twitterHandle, email, name } // User
 ) {
-  console.log({ function: 'handleAuthed' }, { email, authedIdentity, existingIdentity });
 
   // Update any existing identity credentials
   const existingIdentity = await Identity.findOne({
