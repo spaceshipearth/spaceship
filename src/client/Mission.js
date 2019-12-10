@@ -63,8 +63,8 @@ export const missionQuery = gql`
     }
     currentUser {
       id
+    }
   }
-}
 `;
 
 export const joinMissionMutation = gql`

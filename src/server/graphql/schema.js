@@ -44,6 +44,7 @@ const schema = gql`
     upcomingMissions: [Mission]
     completedMissions: [Mission]
     mission(id: ID!): Mission
+    user(id: ID!): User
   }
 
   type Mutation {

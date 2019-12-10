@@ -32,6 +32,9 @@ export default {
     mission: async (parent, { id }, {}) => {
       return models.Mission.findByPk(id);
     },
+    user: async (parent, { id }, {}) => {
+      return models.User.findByPk(id);
+    },
     upcomingMissions: async (parent, { id }, { currentUser }) => {
       const captainedMissions = await models.Mission.findAll({
         where: { captainId: currentUser.id }
