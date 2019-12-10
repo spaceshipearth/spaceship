@@ -7,6 +7,7 @@ import Dashboard from './Dashboard';
 import AdminMissionEditor from './Admin';
 import {SignOutMenuItem} from './Signin';
 import Mission from './Mission';
+import Profile from './Profile';
 import {
   AppBar,
   Button,
@@ -126,6 +127,7 @@ const App = () => {
           <Route exact path="/" component={Dashboard} />
           <Route exact path="/mission/:missionId" component={Mission} />
           <Route exact path="/admin" component={AdminMissionEditor} />
+          <Route exact path="/profile/:userId" component={Profile} />
         </Switch>
       </>
     );
