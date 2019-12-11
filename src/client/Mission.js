@@ -17,12 +17,17 @@ import {
   CardActions,
   Typography,
   Button,
+  Box,
+  TextField,
 } from "@material-ui/core";
 import { useQuery, useMutation } from 'react-apollo';
 import AvatarPng from "../../public/avatar.png";
 import { Signup as WithSignup } from "./Signin";
 import {SharePrompt} from './Share';
-import {MissionCreateStepper} from './MissionConfig';
+import { MissionPlanningStepper } from "./MissionPlanning";
+import { Step, Stepper, StepLabel, StepContent } from "@material-ui/core";
+import _ from 'lodash';
+import { missionDay } from "../shared/util";
 
 export const missionQuery = gql`
   query Mission($id: ID!) {
@@ -66,15 +71,13 @@ export const joinMissionMutation = gql`
   }
 `;
 
-  function timeTillStart(mission) {
-    const SECONDS_PER_HOUR = 60 * 60;
-    const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
-    const deltaSeconds =  mission.startTime - Date.now()/1000;
-    return deltaSeconds > SECONDS_PER_DAY ? Math.floor(deltaSeconds/SECONDS_PER_DAY) + ' days' : Math.round(deltaSeconds/SECONDS_PER_HOUR) + ' hours';
-  }
 
-
-
+function timeTillStart(mission) {
+  const SECONDS_PER_HOUR = 60 * 60;
+  const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+  const deltaSeconds =  mission.startTime - Date.now()/1000;
+  return deltaSeconds > SECONDS_PER_DAY ? Math.floor(deltaSeconds/SECONDS_PER_DAY) + ' days' : Math.round(deltaSeconds/SECONDS_PER_HOUR) + ' hours';
+}
 function Mission({match}) {
   const [joinTeamMutation] = useMutation(joinMissionMutation);
   const { data, loading, error } = useQuery(missionQuery, {
@@ -89,11 +92,12 @@ function Mission({match}) {
     return '';
   }
   const mission = data.mission;
-  const missionHasStarted = false;
+  let missionHasStarted = false;
 
   let missionStartMsg = "Mission starts";
   if (mission && mission.startTime) {
     if (mission.startTime * 1000 < Date.now()) {
+      missionHasStarted = true;
       missionStartMsg = "Mission has started";
     } else {
       missionStartMsg = "Mission starts in " + timeTillStart(mission);
@@ -104,18 +108,32 @@ function Mission({match}) {
       <MissionPageHeader goal={mission.goal} />
       <Grid container style={{ marginTop: 10 }} spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper style={{ padding: 16 }}>
+          <Paper style={{ padding: 16, minHeight: 400 }}>
             {missionHasStarted ? (
-              ""
-            ) : (
               <>
                 <Typography gutterBottom variant="h6">
-                  Plan a mission
+                  Mission progress
                 </Typography>
-                {mission.startTime ? <Paper> {missionStartMsg} </Paper> : ""}
+                Today is day {missionDay(mission)} of your 7 day mission to{" "}
+                {mission.goal.shortDescription.toLowerCase()}.
 
-                <MissionCreateStepper mission={mission} />
+                <Stepper activeStep={0} alternativeLabel={true}>
+                  {_.range(7).map(index => (
+                    <Step key={index}>
+                      <StepLabel></StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                <TextField
+                  variant="outlined"
+                  multiline
+                  fullWidth
+                  rows={3}
+                ></TextField>
+                <Button>Post update</Button>
               </>
+            ) : (
+              <MissionPlanningStepper mission={mission} />
             )}
           </Paper>
         </Grid>
@@ -133,26 +151,26 @@ function Mission({match}) {
 }
 
 function MissionPageHeader({goal}) {
-  return <Card key={goal.id}>
-    <CardMedia
-      style={{ height: 140 }}
-      image={`/goals/${goal.id}.jpg`}
-      title={goal.title}
-    />
-    <CardContent>
-      <Typography gutterBottom variant="h5" component="h2">
-        {goal.title}
-      </Typography>
-      <br />
-      <Typography
-        variant="body1"
-        color="textSecondary"
-        component="p"
-        dangerouslySetInnerHTML={{ __html: goal.longDescription }}
+  return (
+    <Card key={goal.id}>
+      <CardMedia
+        style={{ height: 140 }}
+        image={`/goals/${goal.id}.jpg`}
+        title={goal.title}
       />
-    </CardContent>
-    <CardActions></CardActions>
-  </Card>;
+      <CardContent>
+        <Typography gutterBottom variant="h5" component="h2">
+          {goal.title}
+        </Typography>
+        <Typography
+          variant="body1"
+          component="span"
+          dangerouslySetInnerHTML={{ __html: goal.longDescription }}
+        />
+      </CardContent>
+      <CardActions></CardActions>
+    </Card>
+  );
 }
 
 function MissionTeamModule({currentUser, teamUsers, handleJoinClick}) {

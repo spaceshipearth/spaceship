@@ -33,16 +33,13 @@ export default {
       return models.Mission.findByPk(id);
     },
     upcomingMissions: async (parent, { id }, { currentUser }) => {
-      const captainedMissions = await models.Mission.findAll({
-        where: { captainId: currentUser.id }
-      });
       const joinedMissionUserRows = await models.UserMission.findAll({
         where: { userId: currentUser.id }
       });
       const joinedMissions = await models.Mission.findAll({
         where: { id: joinedMissionUserRows.map(mu => mu.missionId) }
       });
-      return captainedMissions.concat(joinedMissions).filter(m => m.startTime);
+      return joinedMissions.filter(m => m.startTime);
     }
   },
   Category: {
@@ -120,12 +117,17 @@ export default {
       return currentUser.id;
     },
     planMission: async (_, { goalId }, { currentUser }) => {
-      return models.Mission.create({
+      const mission = await models.Mission.create({
         goalId: goalId,
         captainId: currentUser.id
       });
+      await models.UserMission.create({
+        userId: currentUser.id,
+        missionId: mission.id
+      });
+      return mission;
     },
-    scheduleMission: async (_, { id, startTime }, { }) => {
+    scheduleMission: async (_, { id, startTime }, {}) => {
       await models.Mission.update(
         {
           startTime: startTime * 1000,
