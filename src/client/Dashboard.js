@@ -133,7 +133,13 @@ function GoalCard({goal}) {
   }
 
   return (
-    <Grid item component={Card} key={goal.id} style={cardStyle}>
+    <Grid
+      item
+      component={Card}
+      key={goal.id}
+      style={cardStyle}
+      onClick={handlePlanMissionClick}
+    >
       <CardActionArea>
         <CardMedia
           style={{ height: 140 }}
@@ -160,16 +166,11 @@ function GoalCard({goal}) {
 
 function MissionRow({ mission }) {
   return (
-    <ListItem
-      divider
-      button
-      component={Link}
-      to={`/mission/${mission.id}`}
-    >
+    <ListItem divider button component={Link} to={`/mission/${mission.id}`}>
       <ListItemAvatar>
         <Avatar
           variant="square"
-          src="https://timedotcom.files.wordpress.com/2019/03/kitten-report.jpg"
+          src={`/goals/${mission.goal.id}.jpg`}
         />
       </ListItemAvatar>
       <ListItemText
