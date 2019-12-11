@@ -135,8 +135,17 @@ export default {
       );
       return models.Mission.findByPk(id);
     },
+    cancelMission: async (_, { id, startTime }, {}) => {
+      await models.Mission.update(
+        {
+          startTime: null,
+          endTime: null
+        },
+        { where: { id } }
+      );
+      return models.Mission.findByPk(id);
+    },
     joinMission: async (_, { id }, { req, res, currentUser }) => {
-      // TODO: enforce uniqueness in the DB
       await models.UserMission.create({
         userId: currentUser.id,
         missionId: id

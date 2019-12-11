@@ -50,7 +50,7 @@ const schema = gql`
     signIn(email: String!, cont: String): Int
     signOut: ID
     planMission(goalId: ID!): Mission
-
+    cancelMission(id: ID!): Mission
     upsertCategory(
       id: ID
       title: String
