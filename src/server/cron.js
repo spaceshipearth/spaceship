@@ -19,7 +19,7 @@ function reportingErrors(handler) {
 }
 
 const cronConfig = [
-  ['* * * * *', sendMissionEmails], // 7m PST (8am PDT)
+  ['15 19 * * *', sendMissionEmails], // 7m PST (8am PDT)
 ];
 
 let scheduledJobs = [];
