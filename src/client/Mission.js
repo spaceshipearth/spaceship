@@ -34,6 +34,7 @@ export const missionQuery = gql`
     mission(id: $id) {
       id
       startTime
+      endTime
       captain {
         id
         name
@@ -71,7 +72,6 @@ export const joinMissionMutation = gql`
   }
 `;
 
-
 function timeTillStart(mission) {
   const SECONDS_PER_HOUR = 60 * 60;
   const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
@@ -93,14 +93,9 @@ function Mission({match}) {
   }
   const mission = data.mission;
   let missionHasStarted = false;
-
-  let missionStartMsg = "Mission starts";
   if (mission && mission.startTime) {
     if (mission.startTime * 1000 < Date.now()) {
       missionHasStarted = true;
-      missionStartMsg = "Mission has started";
-    } else {
-      missionStartMsg = "Mission starts in " + timeTillStart(mission);
     }
   }
   return (
@@ -114,16 +109,8 @@ function Mission({match}) {
                 <Typography gutterBottom variant="h6">
                   Mission progress
                 </Typography>
-                Today is day {missionDay(mission)} of your 7 day mission to{" "}
-                {mission.goal.shortDescription.toLowerCase()}.
-
-                <Stepper activeStep={0} alternativeLabel={true}>
-                  {_.range(7).map(index => (
-                    <Step key={index}>
-                      <StepLabel></StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
+                <MissionStatusDescription mission={mission}/>
+                <MissionProgressStepper mission={mission} />
                 <TextField
                   variant="outlined"
                   multiline
@@ -148,6 +135,31 @@ function Mission({match}) {
       <Paper></Paper>
     </Container>
   );
+}
+
+function MissionStatusDescription({mission}) {
+  console.log(mission.endTime * 1000);
+  console.log(Date.now());
+  const missionHasEnded = mission.endTime * 1000 < Date.now();
+  return missionHasEnded ? (
+    <Typography>Your mission to has ended. How did it go?</Typography>
+  ) : (
+    <Typography>
+      Today is day {missionDay(mission)} of your 7 day mission to{" "}
+      {mission.goal.shortDescription.toLowerCase()}.
+    </Typography>
+  );
+}
+
+function MissionProgressStepper({mission}) {
+
+  return <Stepper activeStep={missionDay(mission) - 1} alternativeLabel={true}>
+    {_.range(7).map(index => (
+      <Step key={index}>
+        <StepLabel></StepLabel>
+      </Step>
+    ))}
+  </Stepper>;
 }
 
 function MissionPageHeader({goal}) {

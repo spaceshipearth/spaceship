@@ -152,7 +152,7 @@ export function MissionPlanningStepper({mission}) {
 }
 
 // Scheduling date picker
-const nextMonday = "2019-12-18T21:11:54";
+const nextMonday = "2019-12-18T00:00:00";
 function MissionStartPicker({ mission, onChange }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date(mission.startTime * 1000 || nextMonday)

@@ -23,7 +23,10 @@ function dateDiffInDays(a, b) {
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
-export function missionDay(mission) {
-  const startTime = new Date(mission.startTime * 1000);
+export function missionDay(mission, inMS) {
+  // Not the best but GraphQL only has Int natively
+  const startTime = new Date(
+    inMS ? mission.startTime : mission.startTime * 1000
+  );
   return dateDiffInDays(startTime, new Date()) + 1;
 }
