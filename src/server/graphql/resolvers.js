@@ -64,12 +64,9 @@ export default {
       const userMissions = await models.UserMission.findAll({
         where: { missionId: parent.id }
       });
-      const captain = await models.User.findByPk(parent.captainId);
-      const team = await models.User.findAll({
+      return models.User.findAll({
         where: { id: userMissions.map(um => um.userId) }
       });
-      team.push(captain);
-      return team;
     }
   },
   Mutation: {
