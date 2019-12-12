@@ -138,8 +138,6 @@ function Mission({match}) {
 }
 
 function MissionStatusDescription({mission}) {
-  console.log(mission.endTime * 1000);
-  console.log(Date.now());
   const missionHasEnded = mission.endTime * 1000 < Date.now();
   return missionHasEnded ? (
     <Typography>Your mission to has ended. How did it go?</Typography>
