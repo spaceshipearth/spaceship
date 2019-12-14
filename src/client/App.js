@@ -136,6 +136,7 @@ const App = () => {
       <Switch>
         <Route exact path="/" component={Home} />
         <Route exact path="/mission/:missionId" component={Mission} />
+        <Route exact path="/profile/:userId" component={Profile} />
       </Switch>
     );
   }

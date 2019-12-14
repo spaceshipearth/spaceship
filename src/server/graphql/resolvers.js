@@ -35,6 +35,9 @@ export default {
     user: async (parent, { id }, {}) => {
       return models.User.findByPk(id);
     },
+    isAdmin: async (parent, {}, { currentUser }) => {
+      return currentUser && currentUser.isAdmin;
+    },
     upcomingMissions: async (parent, { id }, { currentUser }) => {
       const captainedMissions = await models.Mission.findAll({
         where: { captainId: currentUser.id }
@@ -95,6 +98,11 @@ export default {
         pathname: "/auth/signin",
         query: { email: user.email, token: user.password, cont }
       });
+
+      // on localhost, email might not work; log sign-in links to the console
+      if (process.env.APP_HOST === 'localhost') {
+        console.log(signInUrl);
+      }
 
       await email.send({
         to: user.email,
