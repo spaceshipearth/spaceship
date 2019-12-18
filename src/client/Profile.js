@@ -15,7 +15,7 @@ import {
   Clear,
   Save,
 } from '@material-ui/icons';
-import { useQuery } from 'react-apollo';
+import { useQuery, useMutation } from 'react-apollo';
 
 export const userQuery = gql`
   query User($id: ID!) {
@@ -29,6 +29,20 @@ export const userQuery = gql`
       id
     }
     isAdmin
+  }
+`;
+
+export const updateUserMutation = gql`
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      success
+      user {
+        id
+        name
+        email
+        photoUrl
+      }
+    }
   }
 `;
 
@@ -88,6 +102,12 @@ function ProfileField({label, value, onSave}) {
 }
 
 function Profile({match}) {
+  const [updateUserHandler] = useMutation(updateUserMutation);
+
+  function handleNameUpdate(newName) {
+    updateUserHandler({variables:{input: {userId: data.user.id, field: 'name', value: newName}}});
+  }
+
   const { data, loading, error } = useQuery(userQuery, {variables: {id: match.params.userId}});
   if (loading) {
     return '';
@@ -96,9 +116,6 @@ function Profile({match}) {
   const user = data.user;
   const isOwner = data.currentUser && data.currentUser.id === user.id;
   const canEdit = isOwner || data.isAdmin;
-
-  const [name, setName] = useState(user.name);
-  const [editName, setEditName] = useState(false);
 
   return (
     <Container maxWidth="md">
@@ -110,8 +127,11 @@ function Profile({match}) {
             </Typography>
 
             <Box mt={2}>
-              <ProfileField label="Name" value={ name } onSave={ (ev) => setName(ev.target.value) }>
-              </ProfileField>
+              <ProfileField
+                label="Name"
+                value={ user.name }
+                onSave={ (newName) => handleNameUpdate(newName) }
+              ></ProfileField>
             </Box>
 
             <Box mt={2}>

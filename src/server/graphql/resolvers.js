@@ -153,6 +153,25 @@ export default {
         missionId: id
       });
       return models.Mission.findByPk(id);
-    }
+    },
+    updateUser: async (_, { input }, { currentUser }) => {
+      const user = await models.User.findByPk(input.userId);
+      if (!currentUser.isAdmin && currentUser.id !== user.id) {
+        return {
+          success: false,
+          message: 'unauthorized',
+          user: user,
+        };
+      }
+
+      user.set(input.field, input.value);
+      user.save();
+
+      return {
+        success: true,
+        message: 'user updated',
+        user: user,
+      };
+    },
   }
 };

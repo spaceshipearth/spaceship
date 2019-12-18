@@ -49,6 +49,18 @@ const schema = gql`
     user(id: ID!): User
   }
 
+  input UpdateUserInput {
+    userId: ID!
+    field: String!
+    value: String!
+  }
+
+  type UpdateUserResponse {
+    success: Boolean!
+    message: String
+    user: User
+  }
+
   type Mutation {
     signIn(email: String!, cont: String): Int
     signOut: ID
@@ -71,6 +83,7 @@ const schema = gql`
       categoryId: ID
     ): Goal
     deleteGoal(id: ID!): Boolean
+    updateUser(input: UpdateUserInput!): UpdateUserResponse!
 
     joinMission(id: ID!): Mission
     scheduleMission(id: ID!, startTime: Int): Mission
