@@ -24,10 +24,12 @@ import { useQuery, useMutation } from 'react-apollo';
 import AvatarPng from "../../public/avatar.png";
 import { Signup as WithSignup } from "./Signin";
 import {SharePrompt} from './Share';
-import { MissionPlanningStepper } from "./MissionPlanning";
+import { MissionPlanningStepper,sharingMessage } from "./MissionPlanning";
 import { Step, Stepper, StepLabel, StepContent } from "@material-ui/core";
 import _ from 'lodash';
 import { missionDay } from "../shared/util";
+import { Color } from "./../shared/theme";
+import { absoluteUrl } from "../shared/util";
 
 export const missionQuery = gql`
   query Mission($id: ID!) {
@@ -92,49 +94,74 @@ function Mission({match}) {
     return '';
   }
   const mission = data.mission;
+  const currentUser = data.currentUser;
   let missionHasStarted = false;
   if (mission && mission.startTime) {
     if (mission.startTime * 1000 < Date.now()) {
       missionHasStarted = true;
     }
   }
+  const missionHasEnded = mission.endTime * 1000 < Date.now();
+
+
+  const isOnMissionTeam = currentUser && mission.team.filter(u=>u.id == currentUser.id);
+  const isCaptain = currentUser && mission.captain.id == currentUser.id;
+
   return (
     <Container maxWidth="md">
       <MissionPageHeader goal={mission.goal} />
-      <Grid container style={{ marginTop: 10 }} spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper style={{ padding: 16, minHeight: 400 }}>
-            {missionHasStarted ? (
-              <>
-                <Typography gutterBottom variant="h6">
-                  Mission progress
-                </Typography>
-                <MissionStatusDescription mission={mission}/>
-                <MissionProgressStepper mission={mission} />
-                <TextField
-                  variant="outlined"
-                  multiline
-                  fullWidth
-                  rows={3}
-                ></TextField>
-                <Button>Post update</Button>
-              </>
-            ) : (
-              <MissionPlanningStepper mission={mission} />
-            )}
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <MissionTeamModule
-            teamUsers={mission.team}
-            currentUser={data.currentUser}
-            handleJoinClick={handleJoinClick}
-          />
-        </Grid>
-      </Grid>
-      <Paper></Paper>
+
+      {!isOnMissionTeam && !missionHasStarted ? (
+        <MissionJoinPrompt
+          mission={mission}
+          handleJoinClick={handleJoinClick}
+          currentUser={currentUser}
+        />
+      ) : (
+        ""
+      )}
+
+      {isOnMissionTeam && !missionHasStarted && !isCaptain ? (
+        <MissionPending mission={mission} />
+      ) : (
+        ""
+      )}
+
+      <MissionTeamModule teamUsers={mission.team} />
+
+      <Paper style={{ padding: 16 }}>
+        {missionHasStarted ? (
+          <>
+            <Typography gutterBottom variant="h6">
+              Mission progress
+            </Typography>
+            <MissionStatusDescription mission={mission} />
+            <MissionProgressStepper mission={mission} />
+          </>
+        ) : (
+          <>
+            <Typography>
+              This mission starts in {timeTillStart(mission)}.
+            </Typography>
+            {isCaptain ? <MissionPlanningStepper mission={mission} /> : ""}
+          </>
+        )}
+      </Paper>
+      <Paper style={{ padding: 16, marginTop: 20, minHeight: 400 }}>
+        <MissionDiscussion />
+      </Paper>
     </Container>
   );
+}
+
+function MissionDiscussion() {
+  return (
+    <Box>
+      <TextField variant="outlined" multiline fullWidth rows={3}></TextField>
+      <Button>Post update</Button>
+    </Box>
+  );
+
 }
 
 function MissionStatusDescription({mission}) {
@@ -160,6 +187,39 @@ function MissionProgressStepper({mission}) {
   </Stepper>;
 }
 
+function MissionJoinPrompt({mission, handleJoinClick, currentUser}) {
+  return <Paper
+     style={{
+       padding: 20,
+       marginTop:20,
+       backgroundColor: Color.BACKGROUND_GRAY
+     }}
+   >
+     <Typography>
+       {mission.captain.name} has invited you to join them on this
+       mission. During the mission, we will send you reminders to {' '}
+       {mission.goal.shortDescription.toLowerCase()} every day.
+     </Typography>
+     <br />
+     <Typography>
+       This mission starts in {timeTillStart(mission)}.
+     </Typography>
+     <br />
+     <WithSignup isSignedIn={currentUser}>
+       <Button
+         fullWidth
+         size="small"
+         variant="contained"
+         color="primary"
+         onClick={handleJoinClick}
+       >
+         Join
+       </Button>
+     </WithSignup>
+   </Paper>;
+}
+
+
 function MissionPageHeader({goal}) {
   return (
     <Card key={goal.id}>
@@ -182,40 +242,49 @@ function MissionPageHeader({goal}) {
     </Card>
   );
 }
-
-function MissionTeamModule({currentUser, teamUsers, handleJoinClick}) {
-  return <Paper style={{ padding: 16 }}>
-    <Typography gutterBottom variant="h6">
+/*    <Typography gutterBottom variant="h6">
       Team
-    </Typography>
-    <WithSignup isSignedIn={currentUser}>
-      <Button size="small" color="secondary" onClick={handleJoinClick}>
-        Join
-      </Button>
-    </WithSignup>
-    <List>
-      {" "}
-      {teamUsers.map((user, idx) => (
-        <ListItem
-          button
-          component={Link}
-          to={`/profile/${user.id}`}
-          key={user.id}
-          divider={idx < teamUsers.length - 1}
-        >
-          <ListItemAvatar>
-            <Avatar
-              alt={user.name}
-              imgProps={{ width: "40", height: "40" }}
-              src={user.photoUrl || AvatarPng}
-            />
-          </ListItemAvatar>
+    </Typography>;*/
+function MissionPending({mission}) {
+  const sharingUrl = absoluteUrl({ pathname: `/mission/${mission.id}` });
+  return (
+    <Paper style={{ padding: 16, marginTop: 20, marginBottom: 20 }}>
+      <Typography>This mission starts in {timeTillStart(mission)}.  Invite your friends!</Typography>
+      <br/>
+      <SharePrompt
+        sharingUrl={sharingUrl}
+        shareMessage={sharingMessage(sharingUrl)}
+      />
+    </Paper>
+  );
 
-          <ListItemText primary={user.name} />
-        </ListItem>
-      ))}
-    </List>
-  </Paper>;
+}
+
+
+function MissionTeamModule({teamUsers}) {
+  return <Paper style={{ padding: 16, marginTop: 20, marginBottom: 20 }}>
+      <List>
+        {teamUsers.map((user, idx) => (
+          <ListItem
+            button
+            component={Link}
+            to={`/profile/${user.id}`}
+            key={user.id}
+            divider={idx < teamUsers.length - 1}
+          >
+            <ListItemAvatar>
+              <Avatar
+                alt={user.name}
+                imgProps={{ width: "40", height: "40" }}
+                src={user.photoUrl || AvatarPng}
+              />
+            </ListItemAvatar>
+
+            <ListItemText primary={user.name} />
+          </ListItem>
+        ))}
+      </List>
+    </Paper>;
 }
 
 

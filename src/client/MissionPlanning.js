@@ -182,7 +182,7 @@ function MissionStartPicker({ mission, onChange }) {
   );
 }
 
-const sharingMessage = (sharingUrl) => `Hey friends!  I know many of you are concerned about the climate emergency, but like me, unsure about what we can all do.\n
+export const sharingMessage = (sharingUrl) => `Hey friends!  I know many of you are concerned about the climate emergency, but like me, unsure about what we can all do.\n
 I found a site that helps groups take the most impactful, research backed, actions for addressing climate change.\n
 Come check it out and join me for a climate mission:\n
 ${sharingUrl}`;
