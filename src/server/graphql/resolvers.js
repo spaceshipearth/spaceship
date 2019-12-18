@@ -21,6 +21,16 @@ const isAdmin = combineResolvers(isAuthenticated, (parent, args, { currentUser: 
   isAdmin ? skip : new ForbiddenError('Not authorized. ')
 );
 
+
+export async function findTeamUsers(missionId) {
+  const userMissions = await models.UserMission.findAll({
+    where: { missionId: missionId }
+  });
+  return await models.User.findAll({
+    where: { id: userMissions.map(um => um.userId) }
+  });
+}
+
 export default {
   Query: {
     currentUser: async (parent, {}, { currentUser }) => {
@@ -61,12 +71,7 @@ export default {
       return parent.endTime && parent.endTime.getTime() / 1000;
     },
     team: async (parent, {}, {}) => {
-      const userMissions = await models.UserMission.findAll({
-        where: { missionId: parent.id }
-      });
-      return models.User.findAll({
-        where: { id: userMissions.map(um => um.userId) }
-      });
+      return findTeamUsers(parent.id);
     }
   },
   Mutation: {

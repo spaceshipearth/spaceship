@@ -130,12 +130,13 @@ const App = () => {
       </>
     );
   } else {
-    return (
+    return <>
+      <CssBaseline />
       <Switch>
         <Route exact path="/" component={Home} />
         <Route exact path="/mission/:missionId" component={Mission} />
       </Switch>
-    );
+      </>;
   }
 };
 

@@ -1,6 +1,7 @@
 import * as models from "./db/models";
 import * as email from './email';
 import {missionDay} from './../shared/util';
+import { findTeamUsers } from './graphql/resolvers';
 
 export async function sendMissionEmails() {
   const now = Date.now();
@@ -15,18 +16,6 @@ export async function sendMissionEmails() {
   for (let i=0; i<ongoingMissions.length; i++) {
     await sendDailyEmail(ongoingMissions[i]);
   }
-}
-
-async function findTeamUsers(mission) {
-  const userMissions = await models.UserMission.findAll({
-    where: { missionId:mission.id }
-  });
-  const captain = await models.User.findByPk(mission.captainId);
-  const team = await models.User.findAll({
-    where: { id: userMissions.map(um => um.userId) }
-  });
-  team.push(captain);
-  return team;
 }
 
 async function sendDailyEmail(mission) {
@@ -63,7 +52,7 @@ The Spaceship Earth Crew`);
 }
 
 async function sendMissionTeamEmail(mission, subject, body) {
-  const users = await findTeamUsers(mission);
+  const users = await findTeamUsers(mission.id);
   return email.send({
     to: users.map(u => u.email).join(","),
     subject,
