@@ -129,24 +129,24 @@ function Mission({match}) {
 
       <MissionTeamModule teamUsers={mission.team} />
 
-      <Paper style={{ padding: 16 }}>
-        {missionHasStarted ? (
-          <>
-            <Typography gutterBottom variant="h6">
-              Mission progress
-            </Typography>
-            <MissionStatusDescription mission={mission} />
-            <MissionProgressStepper mission={mission} />
-          </>
-        ) : (
-          <>
+      {missionHasStarted ?
+        <Paper style={{ padding: 16 }}>
+              <Typography gutterBottom variant="h6">
+                Mission progress
+              </Typography>
+              <MissionStatusDescription mission={mission} />
+              <MissionProgressStepper mission={mission} />
+        </Paper> : ''}
+
+      {isCaptain && !missionHasStarted ?
+        <Paper style={{ padding: 16 }}>
             <Typography>
               This mission starts in {timeTillStart(mission)}.
             </Typography>
             {isCaptain ? <MissionPlanningStepper mission={mission} /> : ""}
-          </>
-        )}
-      </Paper>
+          </Paper>
+      : ''}
+
       <Paper style={{ padding: 16, marginTop: 20, minHeight: 400 }}>
         <MissionDiscussion />
       </Paper>
