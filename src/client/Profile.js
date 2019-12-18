@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import {
   Box,
@@ -72,6 +72,10 @@ function ProfileFieldButtons({editing, startEditing, cancelEdit, saveEdit}) {
 
 function ProfileField({label, value, onSave}) {
   const [curValue, setCurValue] = useState(value);
+  useEffect(() => {
+    setCurValue(value);
+  }, [value]);
+
   const [editing, setEditing] = useState(false);
 
   const startEditing = onSave ? () => setEditing(true) : false;
@@ -83,7 +87,7 @@ function ProfileField({label, value, onSave}) {
       label={ label }
       variant="outlined"
       value={ curValue }
-      onChange={ (ev) => { setCurValue(ev.target.value) } }
+      onChange={ ev => setCurValue(ev.target.value) }
       InputProps={{
         readOnly: !editing,
         endAdornment: (
