@@ -104,7 +104,7 @@ function Mission({match}) {
   const missionHasEnded = mission.endTime * 1000 < Date.now();
 
 
-  const isOnMissionTeam = currentUser && mission.team.filter(u=>u.id == currentUser.id);
+  const isOnMissionTeam = currentUser && mission.team.filter(u=>u.id == currentUser.id).length;
   const isCaptain = currentUser && mission.captain.id == currentUser.id;
 
   return (
