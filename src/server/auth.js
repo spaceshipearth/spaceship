@@ -46,6 +46,14 @@ const grantConfig = {
   },
 };
 
+async function contMiddleware(req, res, next) {
+  if (req.query.cont) {
+    req.session.cont = req.query.cont;
+  }
+  next();
+}
+
+router.use(contMiddleware);
 router.use(grant(grantConfig));
 
 // promisify fb lib
@@ -290,7 +298,8 @@ async function handleAuthed(
       // await updateFriendsAsync(authedIdentity);
     }
 
-    return signIn(req, res, user);
+    const cont = req.session.cont;
+    return signIn(req, res, user, cont);
   }
 }
 
