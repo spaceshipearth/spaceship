@@ -170,7 +170,6 @@ function GoalCard({goal}) {
 }
 
 function MissionRow({ mission, currentUser }) {
-  console.log(currentUser);
   const re = /[ @]/;
   const teammateNames = mission.team
     .filter(u => u.id != currentUser.id)
