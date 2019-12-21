@@ -58,7 +58,7 @@ function ProfileFieldButtons({editing, startEditing, cancelEdit, saveEdit}) {
         </IconButton>
       </>
     );
-  } else {
+  } else if (Boolean(startEditing)) {
     return (
       <IconButton
         onClick={ startEditing ? startEditing : () => {} }
@@ -67,6 +67,8 @@ function ProfileFieldButtons({editing, startEditing, cancelEdit, saveEdit}) {
         <Edit/>
       </IconButton>
     );
+  } else {
+    return null;
   }
 }
 
@@ -88,6 +90,7 @@ function ProfileField({label, value, onSave}) {
       variant="outlined"
       value={ curValue }
       onChange={ ev => setCurValue(ev.target.value) }
+      fullWidth={ true }
       InputProps={{
         readOnly: !editing,
         endAdornment: (
@@ -108,8 +111,12 @@ function ProfileField({label, value, onSave}) {
 function Profile({match}) {
   const [updateUserHandler] = useMutation(updateUserMutation);
 
-  function handleNameUpdate(newName) {
-    updateUserHandler({variables:{input: {userId: data.user.id, field: 'name', value: newName}}});
+  function makeHandler(field) {
+    return newValue => updateUserHandler({variables: {input: {
+      field,
+      userId: data.user.id,
+      value: newValue,
+    }}});
   }
 
   const { data, loading, error } = useQuery(userQuery, {variables: {id: match.params.userId}});
@@ -134,18 +141,23 @@ function Profile({match}) {
               <ProfileField
                 label="Name"
                 value={ user.name }
-                onSave={ (newName) => handleNameUpdate(newName) }
+                onSave={ canEdit ? (newName => makeHandler('name')(newName)) : false }
               ></ProfileField>
             </Box>
 
             <Box mt={2}>
-              <ProfileField label="Email" value={ user.email || '' }>
-              </ProfileField>
+              <ProfileField
+                label="Email"
+                value={ user.email || '' }
+              ></ProfileField>
             </Box>
 
             <Box mt={2}>
-              <ProfileField label="Photo" value={ user.photo || '' }>
-              </ProfileField>
+              <ProfileField
+                label="Photo"
+                value={ user.photo || '' }
+                onSave={ canEdit ? (newPhoto => makeHandler('photo')(newPhoto)) : false }
+              ></ProfileField>
             </Box>
           </Paper>
         </Grid>
