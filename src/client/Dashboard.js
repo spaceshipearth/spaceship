@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { Avatar, Divider, Container, List,ListItem, Grid, Card, CardActionArea, CardContent, CardMedia, CardActions, Typography,Paper, Button, Box, ListItemText, ListItemIcon, ListItemSecondaryAction, ListItemAvatar } from '@material-ui/core';
 import { useQuery, useMutation } from 'react-apollo';
 import { Link, Redirect } from 'react-router-dom';
+import {timeTillStart} from './Mission';
 
 export const dashboardQuery = gql`
 query Dashboard {
@@ -44,6 +45,10 @@ query Dashboard {
       categoryId
     }
   }
+
+  currentUser {
+    id
+  }
 }
 `;
 
@@ -69,7 +74,7 @@ function Dashboard() {
         {data.upcomingMissions.length ? (
           <List>
             {data.upcomingMissions.map(mission => (
-              <MissionRow key={mission.id} mission={mission} />
+              <MissionRow key={mission.id} mission={mission} currentUser={data.currentUser} />
             ))}
           </List>
         ) : (
@@ -164,7 +169,26 @@ function GoalCard({goal}) {
   );
 }
 
-function MissionRow({ mission }) {
+function MissionRow({ mission, currentUser }) {
+  console.log(currentUser);
+  const re = /[ @]/;
+  const teammateNames = mission.team
+    .filter(u => u.id != currentUser.id)
+    .map(u => u.name.split(re)[0]).join(", ");
+
+  const missionHasEnded = mission.endTime * 1000 < Date.now();
+  let status;
+  if (missionHasEnded) {
+    status = <Typography>This mission has ended</Typography>
+  } else {
+    status = (
+      <Typography>
+        Starts in {timeTillStart(mission)}{" "}
+        {mission.team.length > 1 ? teammateNames : ""}
+      </Typography>
+    );
+  }
+
   return (
     <ListItem divider button component={Link} to={`/mission/${mission.id}`}>
       <ListItemAvatar>
@@ -175,11 +199,7 @@ function MissionRow({ mission }) {
       </ListItemAvatar>
       <ListItemText
         primary={mission.goal.title}
-        secondary={
-          mission.team.map(u => u.name).join(",") +
-          " - " +
-          mission.goal.shortDescription
-        }
+        secondary={status}
       />
     </ListItem>
   );

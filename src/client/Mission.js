@@ -74,7 +74,7 @@ export const joinMissionMutation = gql`
   }
 `;
 
-function timeTillStart(mission) {
+export function timeTillStart(mission) {
   const SECONDS_PER_HOUR = 60 * 60;
   const SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
   const deltaSeconds =  mission.startTime - Date.now()/1000;
