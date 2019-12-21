@@ -8,6 +8,7 @@ const schema = gql`
     name: String!
     email: String!
     photoUrl: String
+    isAdmin: Boolean
   }
 
   type Category {
@@ -44,6 +45,19 @@ const schema = gql`
     upcomingMissions: [Mission]
     completedMissions: [Mission]
     mission(id: ID!): Mission
+    user(id: ID!): User
+  }
+
+  input UpdateUserInput {
+    userId: ID!
+    field: String!
+    value: String!
+  }
+
+  type UpdateUserResponse {
+    success: Boolean!
+    message: String
+    user: User
   }
 
   type Mutation {
@@ -68,6 +82,7 @@ const schema = gql`
       categoryId: ID
     ): Goal
     deleteGoal(id: ID!): Boolean
+    updateUser(input: UpdateUserInput!): UpdateUserResponse!
 
     joinMission(id: ID!): Mission
     scheduleMission(id: ID!, startTime: Int): Mission

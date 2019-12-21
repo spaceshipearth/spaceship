@@ -42,6 +42,9 @@ export default {
     mission: async (parent, { id }, {}) => {
       return models.Mission.findByPk(id);
     },
+    user: async (parent, { id }, {}) => {
+      return models.User.findByPk(id);
+    },
     upcomingMissions: async (parent, { id }, { currentUser }) => {
       const joinedMissionUserRows = await models.UserMission.findAll({
         where: { userId: currentUser.id }
@@ -91,6 +94,11 @@ export default {
         pathname: "/auth/signin",
         query: { email: user.email, token: user.password, cont }
       });
+
+      // on localhost, email might not work; log sign-in links to the console
+      if (process.env.NODE_ENV === 'development') {
+        console.log(signInUrl);
+      }
 
       await email.send({
         to: user.email,
@@ -155,6 +163,25 @@ export default {
         missionId: id
       });
       return models.Mission.findByPk(id);
-    }
+    },
+    updateUser: async (_, { input }, { currentUser }) => {
+      const user = await models.User.findByPk(input.userId);
+      if (!currentUser.isAdmin && currentUser.id !== user.id) {
+        return {
+          success: false,
+          message: 'unauthorized',
+          user: user,
+        };
+      }
+
+      user.set(input.field, input.value);
+      user.save();
+
+      return {
+        success: true,
+        message: 'user updated',
+        user: user,
+      };
+    },
   }
 };
