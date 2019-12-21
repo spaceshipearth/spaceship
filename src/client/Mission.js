@@ -229,8 +229,11 @@ function MissionPageHeader({goal}) {
         title={goal.title}
       />
       <CardContent>
-        <Typography gutterBottom variant="h5" component="h2">
+        <Typography gutterBottom variant="h5" >
           {goal.title}
+        </Typography>
+        <Typography gutterBottom style={{fontWeight:'bold'}}>
+          {goal.shortDescription}
         </Typography>
         <Typography
           variant="body1"
