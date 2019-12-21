@@ -35,9 +35,6 @@ export default {
     user: async (parent, { id }, {}) => {
       return models.User.findByPk(id);
     },
-    isAdmin: async (parent, {}, { currentUser }) => {
-      return currentUser && currentUser.isAdmin;
-    },
     upcomingMissions: async (parent, { id }, { currentUser }) => {
       const captainedMissions = await models.Mission.findAll({
         where: { captainId: currentUser.id }
@@ -100,7 +97,7 @@ export default {
       });
 
       // on localhost, email might not work; log sign-in links to the console
-      if (process.env.APP_HOST === 'localhost') {
+      if (process.env.NODE_ENV === 'development') {
         console.log(signInUrl);
       }
 

@@ -41,7 +41,6 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    isAdmin: Boolean
     categories: [Category]
     upcomingMissions: [Mission]
     completedMissions: [Mission]

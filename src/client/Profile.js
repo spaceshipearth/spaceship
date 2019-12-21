@@ -27,8 +27,8 @@ export const userQuery = gql`
     }
     currentUser {
       id
+      isAdmin
     }
-    isAdmin
   }
 `;
 
@@ -80,6 +80,7 @@ function ProfileField({label, value, onSave}) {
 
   const [editing, setEditing] = useState(false);
 
+  // we condition this on onSave because we pass only startEditing to ProfileFieldButtons
   const startEditing = onSave ? () => setEditing(true) : false;
   const cancelEdit = () => { setEditing(false); setCurValue(value); };
   const saveEdit = () => { setEditing(false); onSave(curValue) };
@@ -90,9 +91,9 @@ function ProfileField({label, value, onSave}) {
       variant="outlined"
       value={ curValue }
       onChange={ ev => setCurValue(ev.target.value) }
-      fullWidth={ true }
+      fullWidth
+      readOnly={ !editing }
       InputProps={{
-        readOnly: !editing,
         endAdornment: (
           <InputAdornment position="end">
             <ProfileFieldButtons
@@ -126,7 +127,7 @@ function Profile({match}) {
 
   const user = data.user;
   const isOwner = data.currentUser && data.currentUser.id === user.id;
-  const canEdit = isOwner || data.isAdmin;
+  const canEdit = isOwner || data.currentUser.isAdmin;
 
   return (
     <Container maxWidth="md">
