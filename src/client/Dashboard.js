@@ -69,12 +69,17 @@ function Dashboard() {
 
   return (
     <Container maxWidth="md" style={{ marginTop: 50 }}>
-      <Paper style={{ padding: 16 }}>
-        <Typography variant="h5">My Missions</Typography>
+      <Typography variant="h4"> My missions</Typography>
+
         {data.upcomingMissions.length ? (
           <List>
-            {data.upcomingMissions.map(mission => (
-              <MissionRow key={mission.id} mission={mission} currentUser={data.currentUser} />
+            {data.upcomingMissions.map((mission, idx) => (
+              <MissionRow
+                key={mission.id}
+                mission={mission}
+                currentUser={data.currentUser}
+                isLast={idx == data.upcomingMissions.length - 1}
+              />
             ))}
           </List>
         ) : (
@@ -82,16 +87,15 @@ function Dashboard() {
             No missions planned yet, pick a mission goal below to get started!
           </Typography>
         )}
-      </Paper>
 
-      <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+      <Typography variant="h4" style={{marginBottom: 20, marginTop:50}}>Plan a new mission</Typography>
 
       {data.categories
         .filter(c => c.goals.length)
         .sort((a, b) => a.displayRank - b.displayRank)
         .map(category => (
           <Box style={{ marginBottom: 64 }} key={category.id}>
-            <Typography variant="h2">{category.title}</Typography>
+            <Typography variant="h5">{category.title}</Typography>
             <Grid container>
               {category.goals
                 .sort((a, b) => a.displayRank - b.displayRank)
@@ -169,7 +173,7 @@ function GoalCard({goal}) {
   );
 }
 
-function MissionRow({ mission, currentUser }) {
+function MissionRow({ mission, currentUser, isLast   }) {
   const re = /[ @]/;
   const teammateNames = mission.team
     .filter(u => u.id != currentUser.id)
@@ -183,13 +187,13 @@ function MissionRow({ mission, currentUser }) {
     status = (
       <Typography>
         Starts in {timeTillStart(mission)}{" "}
-        {mission.team.length > 1 ? teammateNames : ""}
+        {mission.team.length > 1 ? "with " + teammateNames : ""}
       </Typography>
     );
   }
 
   return (
-    <ListItem divider button component={Link} to={`/mission/${mission.id}`}>
+    <ListItem divider={!isLast} button component={Link} to={`/mission/${mission.id}`}>
       <ListItemAvatar>
         <Avatar
           variant="square"
