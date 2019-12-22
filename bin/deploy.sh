@@ -25,7 +25,7 @@ mv .gitignore.deploy .gitignore
 
 npm run build
 git add build
-aws s3 sync --size-only --acl public-read  build/public/ s3://spaceship-earth/public/ --profile=spaceship
+aws s3 sync --size-only --acl public-read  build/public/ s3://spaceship-earth/public/
 eb deploy Spaceship-$1 --staged
 
 # move the real .gitignore back
