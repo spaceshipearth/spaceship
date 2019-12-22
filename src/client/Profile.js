@@ -155,9 +155,9 @@ function Profile({match}) {
 
             <Box mt={2}>
               <ProfileField
-                label="Photo"
-                value={ user.photo || '' }
-                onSave={ canEdit ? (newPhoto => makeHandler('photo')(newPhoto)) : false }
+                label="Photo URL"
+                value={ user.photoUrl || '' }
+                onSave={ canEdit ? (newPhoto => makeHandler('photoUrl')(newPhoto)) : false }
               ></ProfileField>
             </Box>
           </Paper>
