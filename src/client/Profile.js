@@ -91,9 +91,10 @@ function ProfileField({label, value, onSave}) {
       variant="outlined"
       value={ curValue }
       onChange={ ev => setCurValue(ev.target.value) }
+      onBlur={ cancelEdit }
       fullWidth
-      readOnly={ !editing }
       InputProps={{
+        readOnly: !editing,
         endAdornment: (
           <InputAdornment position="end">
             <ProfileFieldButtons
