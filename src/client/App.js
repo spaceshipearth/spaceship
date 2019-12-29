@@ -10,6 +10,7 @@ import Mission from './Mission';
 import Profile from './Profile';
 import {
   AppBar,
+  Box,
   Button,
   CssBaseline,
   IconButton,
@@ -83,6 +84,46 @@ function ProfileMenu() {
   );
 }
 
+function SpaceToolBar() {
+  return (
+    <AppBar elevation={1} position="sticky">
+      <Toolbar>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            component={() => {
+              return (
+                <Link to="/" style={{ textDecoration: "none" }}>
+                  <Typography variant="h6" style={{ color: "white" }}>
+                    Spaceship Earth
+                  </Typography>
+                </Link>
+              );
+            }}
+          />
+          <Route
+            component={() => {
+              return (
+                <>
+                  <IconButton color="inherit" component={Link} to="/">
+                    <ArrowBack />
+                  </IconButton>
+                  <Typography variant="h6" style={{ color: "white" }}>
+                    Spaceship Earth
+                  </Typography>
+                </>
+              );
+            }}
+          />
+        </Switch>
+        <div style={{ flexGrow: 1 }}> </div>
+        <ProfileMenu />
+      </Toolbar>
+    </AppBar>
+  );
+}
+
 const App = () => {
   const { data, loading, error } = useQuery(currentUserQuery);
   if (loading) {
@@ -93,36 +134,7 @@ const App = () => {
     return (
       <>
         <CssBaseline />
-        <AppBar elevation={1} position="sticky">
-          <Toolbar>
-            <Switch>
-              <Route
-                exact
-                path="/"
-                component={() => {
-                  return (
-                    <Link to="/" style={{ textDecoration: "none" }}>
-                      <Typography variant="h6" style={{ color: "white" }}>
-                        Spaceship Earth
-                      </Typography>
-                    </Link>
-                  );
-                }}
-              />
-              <Route
-                component={() => {
-                  return (
-                    <IconButton color="inherit" component={Link} to="/">
-                      <ArrowBack />
-                    </IconButton>
-                  );
-                }}
-              />
-            </Switch>
-            <div style={{ flexGrow: 1 }}> </div>
-            <ProfileMenu />
-          </Toolbar>
-        </AppBar>
+        <SpaceToolBar></SpaceToolBar>
         <Switch>
           <Route exact path="/" component={Dashboard} />
           <Route exact path="/mission/:missionId" component={Mission} />
