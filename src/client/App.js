@@ -23,6 +23,7 @@ import {
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Switch, Route, Link } from "react-router-dom";
 import AvatarPng from "../../public/avatar.png";
+import { Signup, Signin } from "./Signin";
 
 export const currentUserQuery = gql`
   query CurrentUser {
@@ -37,9 +38,10 @@ export const currentUserQuery = gql`
 
 function LogInMenu() {
   return (
-    <Typography>
-      Log in, ya bastard
-    </Typography>
+    <>
+      <Signin />
+      <Signup />
+    </>
   );
 }
 
