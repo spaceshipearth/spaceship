@@ -128,7 +128,7 @@ function Profile({match}) {
 
   const user = data.user;
   const isOwner = data.currentUser && data.currentUser.id === user.id;
-  const canEdit = isOwner || data.currentUser.isAdmin;
+  const canEdit = isOwner || (data.currentUer && data.currentUser.isAdmin);
 
   return (
     <Container maxWidth="md">
