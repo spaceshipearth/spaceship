@@ -10,6 +10,7 @@ import Mission from './Mission';
 import Profile from './Profile';
 import {
   AppBar,
+  Box,
   Button,
   CssBaseline,
   IconButton,
@@ -22,6 +23,7 @@ import {
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import { Switch, Route, Link } from "react-router-dom";
 import AvatarPng from "../../public/avatar.png";
+import { Signup, Signin } from "./Signin";
 
 export const currentUserQuery = gql`
   query CurrentUser {
@@ -34,6 +36,15 @@ export const currentUserQuery = gql`
   }
 `;
 
+function LogInMenu() {
+  return (
+    <>
+      <Signin />
+      <Signup />
+    </>
+  );
+}
+
 function ProfileMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { data, loading, error } = useQuery(currentUserQuery);
@@ -42,6 +53,9 @@ function ProfileMenu() {
   }
 
   const currentUser = data.currentUser;
+  if (!currentUser) {
+    return <LogInMenu />;
+  }
 
   function handleClick(event) {
     setAnchorEl(event.currentTarget);
@@ -83,64 +97,79 @@ function ProfileMenu() {
   );
 }
 
+function SpaceToolBar({ location }) {
+  // we query for the current user so we can tell if we're logged in or not
+  const { data, loading, error } = useQuery(currentUserQuery);
+  if (loading) {
+    return '';
+  }
+
+  // don't render an app bar on the home page for logged-out users
+  const currentUser = data.currentUser;
+  const atHome = location.pathname === '/';
+  if (atHome && !Boolean(currentUser)) {
+    return null;
+  }
+
+  return (
+    <AppBar elevation={1} position="sticky">
+      <Toolbar>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            component={() => {
+              return (
+                <Link to="/" style={{ textDecoration: "none" }}>
+                  <Typography variant="h6" style={{ color: "white" }}>
+                    Spaceship Earth
+                  </Typography>
+                </Link>
+              );
+            }}
+          />
+          <Route
+            component={() => {
+              return (
+                <>
+                  <IconButton color="inherit" component={Link} to="/">
+                    <ArrowBack />
+                  </IconButton>
+                  <Typography variant="h6" style={{ color: "white" }}>
+                    Spaceship Earth
+                  </Typography>
+                </>
+              );
+            }}
+          />
+        </Switch>
+        <div style={{ flexGrow: 1 }}> </div>
+        <ProfileMenu />
+      </Toolbar>
+    </AppBar>
+  );
+}
+
 const App = () => {
   const { data, loading, error } = useQuery(currentUserQuery);
   if (loading) {
     return '';
   }
 
-  if (data.currentUser) {
-    return (
-      <>
-        <CssBaseline />
-        <AppBar elevation={1} position="sticky">
-          <Toolbar>
-            <Switch>
-              <Route
-                exact
-                path="/"
-                component={() => {
-                  return (
-                    <Link to="/" style={{ textDecoration: "none" }}>
-                      <Typography variant="h6" style={{ color: "white" }}>
-                        Spaceship Earth
-                      </Typography>
-                    </Link>
-                  );
-                }}
-              />
-              <Route
-                component={() => {
-                  return (
-                    <IconButton color="inherit" component={Link} to="/">
-                      <ArrowBack />
-                    </IconButton>
-                  );
-                }}
-              />
-            </Switch>
-            <div style={{ flexGrow: 1 }}> </div>
-            <ProfileMenu />
-          </Toolbar>
-        </AppBar>
-        <Switch>
-          <Route exact path="/" component={Dashboard} />
-          <Route exact path="/mission/:missionId" component={Mission} />
-          <Route exact path="/admin" component={AdminMissionEditor} />
-          <Route exact path="/profile/:userId" component={Profile} />
-        </Switch>
-      </>
-    );
-  } else {
-    return <>
+  const homePageComponent = Boolean(data.currentUser) ? Dashboard : Home;
+
+  return (
+    <>
       <CssBaseline />
+      <Route component={SpaceToolBar} />
       <Switch>
-        <Route exact path="/" component={Home} />
+        <Route exact path="/" component={homePageComponent} />
         <Route exact path="/mission/:missionId" component={Mission} />
+        <Route exact path="/admin" component={AdminMissionEditor} />
         <Route exact path="/profile/:userId" component={Profile} />
       </Switch>
-      </>;
-  }
+    </>
+  );
 };
 
 export default App;

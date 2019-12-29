@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import { useQuery } from "react-apollo";
 import { CategoryEditor, GoalEditor } from "./ObjectEditor";
+import { Redirect } from "react-router-dom";
 
 export const goalsQuery = gql`
   query Missions {
@@ -26,6 +27,10 @@ export const goalsQuery = gql`
         categoryId
       }
     }
+    currentUser {
+      id
+      isAdmin
+    }
   }
 `;
 
@@ -33,6 +38,14 @@ function AdminMissionEditor() {
   const { data, loading, error } = useQuery(goalsQuery);
   if (loading) {
     return "";
+  }
+
+  // TODO: set correct users to admins and uncomment below
+  //if (!Boolean(data.currentUser) || !data.currentUser.isAdmin) {
+  if (!Boolean(data.currentUser)) {
+    return (
+      <Redirect to="/" />
+    );
   }
 
   return (
