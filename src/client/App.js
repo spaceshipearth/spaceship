@@ -35,6 +35,14 @@ export const currentUserQuery = gql`
   }
 `;
 
+function LogInMenu() {
+  return (
+    <Typography>
+      Log in, ya bastard
+    </Typography>
+  );
+}
+
 function ProfileMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { data, loading, error } = useQuery(currentUserQuery);
@@ -43,6 +51,9 @@ function ProfileMenu() {
   }
 
   const currentUser = data.currentUser;
+  if (!currentUser) {
+    return <LogInMenu />;
+  }
 
   function handleClick(event) {
     setAnchorEl(event.currentTarget);
@@ -84,7 +95,20 @@ function ProfileMenu() {
   );
 }
 
-function SpaceToolBar() {
+function SpaceToolBar({ location }) {
+  // we query for the current user so we can tell if we're logged in or not
+  const { data, loading, error } = useQuery(currentUserQuery);
+  if (loading) {
+    return '';
+  }
+
+  // don't render an app bar on the home page for logged-out users
+  const currentUser = data.currentUser;
+  const atHome = location.pathname === '/';
+  if (atHome && !Boolean(currentUser)) {
+    return null;
+  }
+
   return (
     <AppBar elevation={1} position="sticky">
       <Toolbar>
@@ -130,29 +154,20 @@ const App = () => {
     return '';
   }
 
-  if (data.currentUser) {
-    return (
-      <>
-        <CssBaseline />
-        <SpaceToolBar></SpaceToolBar>
-        <Switch>
-          <Route exact path="/" component={Dashboard} />
-          <Route exact path="/mission/:missionId" component={Mission} />
-          <Route exact path="/admin" component={AdminMissionEditor} />
-          <Route exact path="/profile/:userId" component={Profile} />
-        </Switch>
-      </>
-    );
-  } else {
-    return <>
+  const homePageComponent = Boolean(data.currentUser) ? Dashboard : Home;
+
+  return (
+    <>
       <CssBaseline />
+      <Route component={SpaceToolBar} />
       <Switch>
-        <Route exact path="/" component={Home} />
+        <Route exact path="/" component={homePageComponent} />
         <Route exact path="/mission/:missionId" component={Mission} />
+        <Route exact path="/admin" component={AdminMissionEditor} />
         <Route exact path="/profile/:userId" component={Profile} />
       </Switch>
-      </>;
-  }
+    </>
+  );
 };
 
 export default App;
