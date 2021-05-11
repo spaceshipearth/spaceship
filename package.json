@@ -45,7 +45,7 @@
     "graphql-resolvers": "^0.3.3",
     "graphql-tag": "^2.10.1",
     "install": "^0.13.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "mysql2": "^2.0.0",
     "nanoid": "^2.1.6",
     "node-cron": "^2.0.3",
